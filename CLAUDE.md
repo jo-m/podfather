@@ -15,12 +15,7 @@ Requires the Podman API socket to be running (`systemctl --user start podman.soc
 
 ## Architecture
 
-Everything is in `main.go` (~320 lines). The app connects to the Podman REST API (libpod) over a Unix socket using stdlib `net/http` — no podman Go module dependency.
-
-- **Podman API types** (lines 28–110): Structs for JSON responses. `Config.Env` is intentionally omitted so env vars / secrets are never parsed or shown. Do not add it.
-- **Template helpers** (lines 112–188): Functions exposed to templates (`shortID`, `humanSize`, `formatTime`, `formatUnix`, `formatPorts`, `firstName`).
-- **HTTP handlers** (lines 233–292): One handler per route, each calls `podmanGet()` and renders a template.
-- **Templates** (`templates/`): Go `html/template` files embedded via `go:embed`. `base.html` defines the layout with a `{{block "content"}}` slot; page templates define `"content"`.
+The app connects to the Podman REST API (libpod) over a Unix socket using stdlib `net/http` — no podman Go module dependency.
 
 ## Key conventions
 

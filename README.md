@@ -10,7 +10,7 @@ Connects to the local Podman API socket and renders container and image informat
 - Inspect container details (command, mounts, ports, labels, restart policy, health)
 - List images with tags and sizes
 - Trigger `podman auto-update`
-- Environment variables and secrets are never displayed (structurally omitted from JSON parsing)
+- Environment variables and secrets are never displayed
 
 ## Requirements
 
@@ -45,25 +45,3 @@ For rootless Podman, enable the socket with:
 ```
 systemctl --user enable --now podman.socket
 ```
-
-Or start it temporarily:
-
-```
-podman system service --time=0 &
-```
-
-## Architecture
-
-- `main.go` — all Go code (~320 lines): HTTP handlers, Podman API client (HTTP over Unix socket), template helpers
-- `templates/` — HTML templates embedded at compile time via `go:embed`
-- Zero external dependencies — stdlib only
-- Talks to Podman via its REST API (libpod) over the Unix socket
-
-### Routes
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/` | Container list |
-| GET | `/container/{id}` | Container detail |
-| GET | `/images` | Image list |
-| POST | `/auto-update` | Run `podman auto-update` |
