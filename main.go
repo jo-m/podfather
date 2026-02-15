@@ -50,7 +50,11 @@ func main() {
 		handler = http.StripPrefix(basePath, mux)
 	}
 
-	log.Printf("podview listening on %s (socket: %s, base: %s)", addr, sock, basePath)
+	host := addr
+	if strings.HasPrefix(host, ":") {
+		host = "localhost" + host
+	}
+	log.Printf("podview listening on http://%s%s (socket: %s)", host, basePath, sock)
 	log.Fatal(http.ListenAndServe(addr, logRequests(handler)))
 }
 
