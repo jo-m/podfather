@@ -17,6 +17,12 @@ Requires the Podman API socket to be running (`systemctl --user start podman.soc
 
 The app connects to the Podman REST API (libpod) over a Unix socket using stdlib `net/http` — no podman Go module dependency.
 
+- `main.go` — Entry point: server setup and routing.
+- `types.go` — Podman API response structs. `ContainerConfig.Env` is intentionally omitted so env vars are never parsed.
+- `podman.go` — Podman API client: socket path resolution, HTTP-over-Unix-socket client, `podmanGet` helper.
+- `handlers.go` — Template embed/rendering, template helper functions, all HTTP handlers.
+- `templates/` — Go `html/template` files embedded via `go:embed`. `base.html` defines the layout with a `{{block "content"}}` slot; page templates define `"content"`.
+
 ## Key conventions
 
 - **No JavaScript.** All rendering is server-side via Go templates.

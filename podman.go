@@ -1,0 +1,47 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"time"
+)
+
+var podman *http.Client
+
+func socketPath() string {
+	if s := os.Getenv("PODMAN_SOCKET"); s != "" {
+		return s
+	}
+	xdg := os.Getenv("XDG_RUNTIME_DIR")
+	if xdg == "" {
+		xdg = fmt.Sprintf("/run/user/%d", os.Getuid())
+	}
+	return xdg + "/podman/podman.sock"
+}
+
+func initPodmanClient(sock string) {
+	podman = &http.Client{
+		Transport: &http.Transport{
+			DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
+				return net.Dial("unix", sock)
+			},
+		},
+		Timeout: 30 * time.Second,
+	}
+}
+
+func podmanGet(path string, result any) error {
+	resp, err := podman.Get("http://d/v4.0.0/libpod" + path)
+	if err != nil {
+		return fmt.Errorf("podman API: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("podman API %s: %s", path, resp.Status)
+	}
+	return json.NewDecoder(resp.Body).Decode(result)
+}
