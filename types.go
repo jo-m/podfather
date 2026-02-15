@@ -46,14 +46,14 @@ func (s *FlexString) UnmarshalJSON(data []byte) error {
 // not runtime secrets.
 
 type Container struct {
-	ID      string    `json:"Id"`
-	Names   []string  `json:"Names"`
-	Image   string    `json:"Image"`
-	ImageID string    `json:"ImageID"`
-	Command []string  `json:"Command"`
-	Created time.Time `json:"Created"`
-	State   string    `json:"State"`
-	Status  string    `json:"Status"`
+	ID           string              `json:"Id"`
+	Names        []string            `json:"Names"`
+	Image        string              `json:"Image"`
+	ImageID      string              `json:"ImageID"`
+	Command      []string            `json:"Command"`
+	Created      time.Time           `json:"Created"`
+	State        string              `json:"State"`
+	Status       string              `json:"Status"`
 	Ports        []Port              `json:"Ports"`
 	ExposedPorts map[string][]string `json:"ExposedPorts"`
 }
@@ -100,27 +100,27 @@ type Health struct {
 }
 
 type ContainerConfig struct {
-	Hostname     string              `json:"Hostname"`
-	Image        string              `json:"Image"`
-	User         string              `json:"User"`
-	Cmd          []string            `json:"Cmd"`
-	Entrypoint   StringOrSlice       `json:"Entrypoint"`
-	WorkingDir   string              `json:"WorkingDir"`
-	StopSignal   FlexString          `json:"StopSignal"`
-	Labels       map[string]string   `json:"Labels"`
-	Annotations  map[string]string   `json:"Annotations"`
-	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
-	CreateCommand []string           `json:"CreateCommand"`
+	Hostname      string              `json:"Hostname"`
+	Image         string              `json:"Image"`
+	User          string              `json:"User"`
+	Cmd           []string            `json:"Cmd"`
+	Entrypoint    StringOrSlice       `json:"Entrypoint"`
+	WorkingDir    string              `json:"WorkingDir"`
+	StopSignal    FlexString          `json:"StopSignal"`
+	Labels        map[string]string   `json:"Labels"`
+	Annotations   map[string]string   `json:"Annotations"`
+	ExposedPorts  map[string]struct{} `json:"ExposedPorts"`
+	CreateCommand []string            `json:"CreateCommand"`
 	// Env is intentionally omitted — never show environment variables.
 }
 
 type HostConfig struct {
-	RestartPolicy   RestartPolicy `json:"RestartPolicy"`
-	NetworkMode     string        `json:"NetworkMode"`
-	Privileged      bool          `json:"Privileged"`
-	ReadonlyRootfs  bool          `json:"ReadonlyRootfs"`
-	AutoRemove      bool          `json:"AutoRemove"`
-	LogConfig       LogConfig     `json:"LogConfig"`
+	RestartPolicy  RestartPolicy `json:"RestartPolicy"`
+	NetworkMode    string        `json:"NetworkMode"`
+	Privileged     bool          `json:"Privileged"`
+	ReadonlyRootfs bool          `json:"ReadonlyRootfs"`
+	AutoRemove     bool          `json:"AutoRemove"`
+	LogConfig      LogConfig     `json:"LogConfig"`
 }
 
 type RestartPolicy struct {

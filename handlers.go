@@ -17,17 +17,17 @@ import (
 var templateFS embed.FS
 
 var funcMap = template.FuncMap{
-	"shortID":     shortID,
-	"humanSize":   humanSize,
-	"formatUnix":  formatUnix,
-	"formatTime":  formatTime,
+	"shortID":            shortID,
+	"humanSize":          humanSize,
+	"formatUnix":         formatUnix,
+	"formatTime":         formatTime,
 	"formatPorts":        formatPorts,
 	"formatExposedPorts": formatExposedPorts,
-	"firstName":   firstName,
-	"join":        joinStrings,
-	"mapKeys":     mapKeys,
-	"envName":     envName,
-	"envValue":    envValue,
+	"firstName":          firstName,
+	"join":               joinStrings,
+	"mapKeys":            mapKeys,
+	"envName":            envName,
+	"envValue":           envValue,
 }
 
 func joinStrings(elems any, sep string) string {

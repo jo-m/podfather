@@ -31,6 +31,7 @@ The app connects to the Podman REST API (libpod) over a Unix socket using stdlib
 - **Podman API version** is `v4.0.0` in the URL path (compatible with Podman v4+).
 - **Auto-update** is done via `exec.Command("podman", "auto-update")`, not the REST API.
 - **CSS** is inline in `templates/base.html`. No CSS framework. Keep it minimal.
+- **Formatting.** Always run `gofmt -w` on all edited `.go` files after making changes.
 
 ## Testing
 
