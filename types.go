@@ -22,6 +22,23 @@ func (s *StringOrSlice) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// FlexString handles JSON fields that may be a string or a number.
+type FlexString string
+
+func (s *FlexString) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err == nil {
+		*s = FlexString(str)
+		return nil
+	}
+	var num json.Number
+	if err := json.Unmarshal(data, &num); err != nil {
+		return err
+	}
+	*s = FlexString(num.String())
+	return nil
+}
+
 // Podman API response types.
 // ContainerConfig.Env is intentionally omitted so container secrets and
 // environment variables are never parsed or displayed.
@@ -89,7 +106,7 @@ type ContainerConfig struct {
 	Cmd          []string            `json:"Cmd"`
 	Entrypoint   StringOrSlice       `json:"Entrypoint"`
 	WorkingDir   string              `json:"WorkingDir"`
-	StopSignal   string              `json:"StopSignal"`
+	StopSignal   FlexString          `json:"StopSignal"`
 	Labels       map[string]string   `json:"Labels"`
 	Annotations  map[string]string   `json:"Annotations"`
 	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
@@ -161,7 +178,7 @@ type ImageConfig struct {
 	Cmd          []string            `json:"Cmd"`
 	Entrypoint   StringOrSlice       `json:"Entrypoint"`
 	WorkingDir   string              `json:"WorkingDir"`
-	StopSignal   string              `json:"StopSignal"`
+	StopSignal   FlexString          `json:"StopSignal"`
 	Env          []string            `json:"Env"`
 	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
 }
