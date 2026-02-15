@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 )
@@ -111,6 +112,9 @@ func handleContainers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Created.After(list[j].Created)
+	})
 	render(w, "containers.html", map[string]any{
 		"Title":      "Containers",
 		"Containers": list,
