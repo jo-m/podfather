@@ -159,32 +159,32 @@ func firstName(names []string) string {
 	return ""
 }
 
-func render(w http.ResponseWriter, page string, data any) {
+func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 	t, err := template.New("").Funcs(funcMap).ParseFS(
 		templateFS, "templates/base.html", "templates/"+page,
 	)
 	if err != nil {
-		log.Printf("template parse %s: %v", page, err)
+		log.Printf("[%s] template parse %s: %v", reqID(r.Context()), page, err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := t.ExecuteTemplate(w, "base", data); err != nil {
-		log.Printf("render %s: %v", page, err)
+		log.Printf("[%s] render %s: %v", reqID(r.Context()), page, err)
 	}
 }
 
 func handleContainers(w http.ResponseWriter, r *http.Request) {
 	var list []Container
 	if err := podmanGet("/containers/json?all=true", &list); err != nil {
-		log.Printf("podman API error: %v", err)
+		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].Created.After(list[j].Created)
 	})
-	render(w, "containers.html", map[string]any{
+	render(w, r, "containers.html", map[string]any{
 		"Title":      "Containers",
 		"Containers": list,
 	})
@@ -194,7 +194,7 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var c ContainerInspect
 	if err := podmanGet("/containers/"+id+"/json", &c); err != nil {
-		log.Printf("podman API error: %v", err)
+		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -202,7 +202,7 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		name = shortID(c.ID)
 	}
-	render(w, "container.html", map[string]any{
+	render(w, r, "container.html", map[string]any{
 		"Title":     "Container: " + name,
 		"Container": c,
 	})
@@ -211,11 +211,11 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 func handleImages(w http.ResponseWriter, r *http.Request) {
 	var list []ImageSummary
 	if err := podmanGet("/images/json", &list); err != nil {
-		log.Printf("podman API error: %v", err)
+		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	render(w, "images.html", map[string]any{
+	render(w, r, "images.html", map[string]any{
 		"Title":  "Images",
 		"Images": list,
 	})
@@ -225,7 +225,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var img ImageInspect
 	if err := podmanGet("/images/"+id+"/json", &img); err != nil {
-		log.Printf("podman API error: %v", err)
+		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -236,7 +236,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		name = shortID(img.ID)
 	}
-	render(w, "image.html", map[string]any{
+	render(w, r, "image.html", map[string]any{
 		"Title": "Image: " + name,
 		"Image": img,
 	})
@@ -253,7 +253,7 @@ func handleAutoUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errMsg = err.Error()
 	}
-	render(w, "autoupdate.html", map[string]any{
+	render(w, r, "autoupdate.html", map[string]any{
 		"Title":  "Auto Update",
 		"Output": string(out),
 		"Error":  errMsg,
