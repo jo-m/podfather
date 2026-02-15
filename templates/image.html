@@ -23,6 +23,16 @@
         <dt>Author</dt>
         <dd>{{.Image.Author}}</dd>
         {{end}}
+        {{if .Image.Comment}}
+        <dt>Comment</dt>
+        <dd>{{.Image.Comment}}</dd>
+        {{end}}
+        {{if .Image.User}}
+        <dt>User</dt>
+        <dd class="mono">{{.Image.User}}</dd>
+        {{end}}
+        <dt>Layers</dt>
+        <dd>{{len .Image.RootFS.Layers}}</dd>
     </dl>
 </div>
 
@@ -45,8 +55,31 @@
         <dt>Stop Signal</dt>
         <dd>{{.Image.Config.StopSignal}}</dd>
         {{end}}
+        {{if .Image.Config.ExposedPorts}}
+        <dt>Exposed Ports</dt>
+        <dd class="mono">{{join (mapKeys .Image.Config.ExposedPorts) ", "}}</dd>
+        {{end}}
     </dl>
 </div>
+
+{{if .Image.Config.Env}}
+<div class="card">
+    <h2>Environment Variables</h2>
+    <table>
+        <thead>
+            <tr><th>Variable</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {{range .Image.Config.Env}}
+            <tr>
+                <td class="mono">{{envName .}}</td>
+                <td class="mono">{{envValue .}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
 
 {{if .Image.RepoDigests}}
 <div class="card">
@@ -73,6 +106,26 @@
             <tr>
                 <td class="mono">{{$k}}</td>
                 <td class="mono">{{$v}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+
+{{if .Image.History}}
+<div class="card">
+    <h2>History</h2>
+    <table>
+        <thead>
+            <tr><th>Created</th><th>Created By</th><th>Size</th></tr>
+        </thead>
+        <tbody>
+            {{range .Image.History}}
+            <tr>
+                <td style="white-space:nowrap">{{formatTime .Created}}</td>
+                <td class="mono">{{.CreatedBy}}</td>
+                <td>{{if .Empty}}0 B{{else}}-{{end}}</td>
             </tr>
             {{end}}
         </tbody>

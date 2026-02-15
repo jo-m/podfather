@@ -25,20 +25,93 @@
         <dt>Exit Code</dt>
         <dd>{{.Container.State.ExitCode}}</dd>
         {{end}}
-        <dt>Command</dt>
-        <dd class="mono">{{join .Container.Config.Cmd " "}}</dd>
+        {{if .Container.State.Running}}
+        <dt>PID</dt>
+        <dd class="mono">{{.Container.State.Pid}}</dd>
+        {{end}}
+        {{if .Container.State.OOMKilled}}
+        <dt>OOM Killed</dt>
+        <dd>yes</dd>
+        {{end}}
         <dt>Restart Count</dt>
         <dd>{{.Container.RestartCount}}</dd>
-        {{if .Container.HostConfig}}
-        <dt>Restart Policy</dt>
-        <dd>{{.Container.HostConfig.RestartPolicy.Name}}</dd>
-        {{end}}
         {{if .Container.State.Health}}
         <dt>Health</dt>
         <dd>{{.Container.State.Health.Status}}</dd>
         {{end}}
     </dl>
 </div>
+
+<div class="card">
+    <h2>Config</h2>
+    <dl class="props">
+        {{if .Container.Config.Hostname}}
+        <dt>Hostname</dt>
+        <dd class="mono">{{.Container.Config.Hostname}}</dd>
+        {{end}}
+        {{if .Container.Config.User}}
+        <dt>User</dt>
+        <dd class="mono">{{.Container.Config.User}}</dd>
+        {{end}}
+        {{if .Container.Config.Entrypoint}}
+        <dt>Entrypoint</dt>
+        <dd class="mono">{{join .Container.Config.Entrypoint " "}}</dd>
+        {{end}}
+        <dt>Command</dt>
+        <dd class="mono">{{join .Container.Config.Cmd " "}}</dd>
+        {{if .Container.Config.WorkingDir}}
+        <dt>Working Dir</dt>
+        <dd class="mono">{{.Container.Config.WorkingDir}}</dd>
+        {{end}}
+        {{if .Container.Config.StopSignal}}
+        <dt>Stop Signal</dt>
+        <dd>{{.Container.Config.StopSignal}}</dd>
+        {{end}}
+        {{if .Container.Config.ExposedPorts}}
+        <dt>Exposed Ports</dt>
+        <dd class="mono">{{join (mapKeys .Container.Config.ExposedPorts) ", "}}</dd>
+        {{end}}
+    </dl>
+</div>
+
+{{if .Container.Config.CreateCommand}}
+<div class="card">
+    <h2>Create Command</h2>
+    <pre>{{join .Container.Config.CreateCommand " "}}</pre>
+</div>
+{{end}}
+
+{{if .Container.HostConfig}}
+<div class="card">
+    <h2>Host Config</h2>
+    <dl class="props">
+        <dt>Restart Policy</dt>
+        <dd>{{.Container.HostConfig.RestartPolicy.Name}}</dd>
+        {{if .Container.HostConfig.NetworkMode}}
+        <dt>Network Mode</dt>
+        <dd>{{.Container.HostConfig.NetworkMode}}</dd>
+        {{end}}
+        {{if .Container.HostConfig.LogConfig.Type}}
+        <dt>Log Driver</dt>
+        <dd>{{.Container.HostConfig.LogConfig.Type}}</dd>
+        {{end}}
+        <dt>Privileged</dt>
+        <dd>{{if .Container.HostConfig.Privileged}}yes{{else}}no{{end}}</dd>
+        <dt>Read-only Rootfs</dt>
+        <dd>{{if .Container.HostConfig.ReadonlyRootfs}}yes{{else}}no{{end}}</dd>
+        <dt>Auto Remove</dt>
+        <dd>{{if .Container.HostConfig.AutoRemove}}yes{{else}}no{{end}}</dd>
+        {{if .Container.OCIRuntime}}
+        <dt>Runtime</dt>
+        <dd>{{.Container.OCIRuntime}}</dd>
+        {{end}}
+        {{if .Container.Driver}}
+        <dt>Storage Driver</dt>
+        <dd>{{.Container.Driver}}</dd>
+        {{end}}
+    </dl>
+</div>
+{{end}}
 
 {{if .Container.NetworkSettings}}{{if .Container.NetworkSettings.Ports}}
 <div class="card">
@@ -98,6 +171,25 @@
         </thead>
         <tbody>
             {{range $k, $v := .Container.Config.Labels}}
+            <tr>
+                <td class="mono">{{$k}}</td>
+                <td class="mono">{{$v}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+
+{{if .Container.Config.Annotations}}
+<div class="card">
+    <h2>Annotations</h2>
+    <table>
+        <thead>
+            <tr><th>Key</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {{range $k, $v := .Container.Config.Annotations}}
             <tr>
                 <td class="mono">{{$k}}</td>
                 <td class="mono">{{$v}}</td>

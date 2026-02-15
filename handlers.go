@@ -24,7 +24,21 @@ var funcMap = template.FuncMap{
 	"formatPorts":        formatPorts,
 	"formatExposedPorts": formatExposedPorts,
 	"firstName":   firstName,
-	"join":        strings.Join,
+	"join":        joinStrings,
+	"mapKeys":     mapKeys,
+	"envName":     envName,
+	"envValue":    envValue,
+}
+
+func joinStrings(elems any, sep string) string {
+	switch v := elems.(type) {
+	case []string:
+		return strings.Join(v, sep)
+	case StringOrSlice:
+		return strings.Join([]string(v), sep)
+	default:
+		return ""
+	}
 }
 
 func shortID(id string) string {
@@ -113,6 +127,29 @@ func formatExposedPorts(ep map[string][]string) string {
 	}
 	sort.Strings(parts)
 	return strings.Join(parts, ", ")
+}
+
+func envName(s string) string {
+	if i := strings.IndexByte(s, '='); i >= 0 {
+		return s[:i]
+	}
+	return s
+}
+
+func envValue(s string) string {
+	if i := strings.IndexByte(s, '='); i >= 0 {
+		return s[i+1:]
+	}
+	return ""
+}
+
+func mapKeys(m map[string]struct{}) []string {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func firstName(names []string) string {

@@ -1,10 +1,32 @@
 package main
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
+
+// StringOrSlice handles JSON fields that may be either a string or []string.
+type StringOrSlice []string
+
+func (s *StringOrSlice) UnmarshalJSON(data []byte) error {
+	var slice []string
+	if err := json.Unmarshal(data, &slice); err == nil {
+		*s = slice
+		return nil
+	}
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	*s = []string{str}
+	return nil
+}
 
 // Podman API response types.
-// Fields like Config.Env are intentionally omitted so secrets and
+// ContainerConfig.Env is intentionally omitted so container secrets and
 // environment variables are never parsed or displayed.
+// ImageConfig.Env is included because image env vars are build-time defaults,
+// not runtime secrets.
 
 type Container struct {
 	ID      string    `json:"Id"`
@@ -30,6 +52,8 @@ type ContainerInspect struct {
 	ID              string           `json:"Id"`
 	Name            string           `json:"Name"`
 	Created         time.Time        `json:"Created"`
+	Path            string           `json:"Path"`
+	Args            []string         `json:"Args"`
 	Image           string           `json:"Image"`
 	ImageName       string           `json:"ImageName"`
 	State           ContainerState   `json:"State"`
@@ -38,11 +62,16 @@ type ContainerInspect struct {
 	NetworkSettings *NetworkSettings `json:"NetworkSettings"`
 	RestartCount    int32            `json:"RestartCount"`
 	HostConfig      *HostConfig      `json:"HostConfig"`
+	OCIRuntime      string           `json:"OCIRuntime"`
+	Driver          string           `json:"Driver"`
 }
 
 type ContainerState struct {
 	Status     string    `json:"Status"`
 	Running    bool      `json:"Running"`
+	Paused     bool      `json:"Paused"`
+	Pid        int       `json:"Pid"`
+	OOMKilled  bool      `json:"OOMKilled"`
 	StartedAt  time.Time `json:"StartedAt"`
 	FinishedAt time.Time `json:"FinishedAt"`
 	ExitCode   int32     `json:"ExitCode"`
@@ -54,20 +83,36 @@ type Health struct {
 }
 
 type ContainerConfig struct {
-	Hostname string            `json:"Hostname"`
-	Image    string            `json:"Image"`
-	Cmd      []string          `json:"Cmd"`
-	Labels   map[string]string `json:"Labels"`
+	Hostname     string              `json:"Hostname"`
+	Image        string              `json:"Image"`
+	User         string              `json:"User"`
+	Cmd          []string            `json:"Cmd"`
+	Entrypoint   StringOrSlice       `json:"Entrypoint"`
+	WorkingDir   string              `json:"WorkingDir"`
+	StopSignal   string              `json:"StopSignal"`
+	Labels       map[string]string   `json:"Labels"`
+	Annotations  map[string]string   `json:"Annotations"`
+	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
+	CreateCommand []string           `json:"CreateCommand"`
 	// Env is intentionally omitted — never show environment variables.
 }
 
 type HostConfig struct {
-	RestartPolicy RestartPolicy `json:"RestartPolicy"`
+	RestartPolicy   RestartPolicy `json:"RestartPolicy"`
+	NetworkMode     string        `json:"NetworkMode"`
+	Privileged      bool          `json:"Privileged"`
+	ReadonlyRootfs  bool          `json:"ReadonlyRootfs"`
+	AutoRemove      bool          `json:"AutoRemove"`
+	LogConfig       LogConfig     `json:"LogConfig"`
 }
 
 type RestartPolicy struct {
 	Name              string `json:"Name"`
 	MaximumRetryCount uint   `json:"MaximumRetryCount"`
+}
+
+type LogConfig struct {
+	Type string `json:"Type"`
 }
 
 type Mount struct {
@@ -94,23 +139,41 @@ type ImageSummary struct {
 }
 
 type ImageInspect struct {
-	ID          string      `json:"Id"`
-	Digest      string      `json:"Digest"`
-	RepoTags    []string    `json:"RepoTags"`
-	RepoDigests []string    `json:"RepoDigests"`
-	Created     time.Time   `json:"Created"`
-	Author      string      `json:"Author"`
-	Architecture string    `json:"Architecture"`
-	Os          string      `json:"Os"`
-	Size        int64       `json:"Size"`
-	Config      ImageConfig `json:"Config"`
-	Labels      map[string]string `json:"Labels"`
+	ID           string            `json:"Id"`
+	Digest       string            `json:"Digest"`
+	RepoTags     []string          `json:"RepoTags"`
+	RepoDigests  []string          `json:"RepoDigests"`
+	Created      time.Time         `json:"Created"`
+	Author       string            `json:"Author"`
+	Comment      string            `json:"Comment"`
+	Architecture string            `json:"Architecture"`
+	Os           string            `json:"Os"`
+	Size         int64             `json:"Size"`
+	User         string            `json:"User"`
+	Config       ImageConfig       `json:"Config"`
+	Labels       map[string]string `json:"Labels"`
+	RootFS       RootFS            `json:"RootFS"`
+	History      []ImageHistory    `json:"History"`
+	NamesHistory []string          `json:"NamesHistory"`
 }
 
 type ImageConfig struct {
-	Cmd        []string `json:"Cmd"`
-	Entrypoint []string `json:"Entrypoint"`
-	WorkingDir string   `json:"WorkingDir"`
-	StopSignal string   `json:"StopSignal"`
-	// Env is intentionally omitted — never show environment variables.
+	Cmd          []string            `json:"Cmd"`
+	Entrypoint   StringOrSlice       `json:"Entrypoint"`
+	WorkingDir   string              `json:"WorkingDir"`
+	StopSignal   string              `json:"StopSignal"`
+	Env          []string            `json:"Env"`
+	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
+}
+
+type RootFS struct {
+	Type   string   `json:"Type"`
+	Layers []string `json:"Layers"`
+}
+
+type ImageHistory struct {
+	Created   time.Time `json:"created"`
+	CreatedBy string    `json:"created_by"`
+	Comment   string    `json:"comment"`
+	Empty     bool      `json:"empty_layer"`
 }
