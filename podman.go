@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+// errNotFound is returned when the Podman API responds with 404.
+var errNotFound = fmt.Errorf("not found")
+
 var podman *http.Client
 
 func socketPath() string {
@@ -40,6 +43,9 @@ func podmanGet(path string, result any) error {
 		return fmt.Errorf("podman API: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		return errNotFound
+	}
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("podman API %s: %s", path, resp.Status)
 	}

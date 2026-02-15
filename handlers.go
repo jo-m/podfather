@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -194,6 +195,10 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var c ContainerInspect
 	if err := podmanGet("/containers/"+id+"/json", &c); err != nil {
+		if errors.Is(err, errNotFound) {
+			http.Error(w, "Container Not Found", http.StatusNotFound)
+			return
+		}
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -225,6 +230,10 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var img ImageInspect
 	if err := podmanGet("/images/"+id+"/json", &img); err != nil {
+		if errors.Is(err, errNotFound) {
+			http.Error(w, "Image Not Found", http.StatusNotFound)
+			return
+		}
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
