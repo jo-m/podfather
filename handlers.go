@@ -164,7 +164,8 @@ func render(w http.ResponseWriter, page string, data any) {
 		templateFS, "templates/base.html", "templates/"+page,
 	)
 	if err != nil {
-		http.Error(w, "template error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("template parse %s: %v", page, err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -176,7 +177,8 @@ func render(w http.ResponseWriter, page string, data any) {
 func handleContainers(w http.ResponseWriter, r *http.Request) {
 	var list []Container
 	if err := podmanGet("/containers/json?all=true", &list); err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		log.Printf("podman API error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	sort.Slice(list, func(i, j int) bool {
@@ -192,7 +194,8 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var c ContainerInspect
 	if err := podmanGet("/containers/"+id+"/json", &c); err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		log.Printf("podman API error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	name := c.Name
@@ -208,7 +211,8 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 func handleImages(w http.ResponseWriter, r *http.Request) {
 	var list []ImageSummary
 	if err := podmanGet("/images/json", &list); err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		log.Printf("podman API error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	render(w, "images.html", map[string]any{
@@ -221,7 +225,8 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var img ImageInspect
 	if err := podmanGet("/images/"+id+"/json", &img); err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		log.Printf("podman API error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	name := ""
