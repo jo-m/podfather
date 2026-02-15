@@ -1,0 +1,31 @@
+{{define "content"}}
+<h1>Containers</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>State</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Ports</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Containers}}
+        <tr>
+            <td class="mono"><a href="/container/{{.ID}}">{{shortID .ID}}</a></td>
+            <td>{{firstName .Names}}</td>
+            <td class="mono">{{.Image}}</td>
+            <td><span class="badge badge-{{.State}}">{{.State}}</span></td>
+            <td>{{.Status}}</td>
+            <td>{{formatTime .Created}}</td>
+            <td class="mono">{{formatPorts .Ports}}</td>
+        </tr>
+        {{else}}
+        <tr><td colspan="7" class="empty">No containers found.</td></tr>
+        {{end}}
+    </tbody>
+</table>
+{{end}}

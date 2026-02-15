@@ -1,0 +1,60 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.Title}} — podview</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; color: #1a1a2e; background: #f0f0f5; }
+        nav { background: #1a1a2e; color: #ccc; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; }
+        nav a:hover { color: #fff; }
+        .brand { font-weight: 700; font-size: 1.1rem; color: #e2e8f0; letter-spacing: -0.02em; }
+        .spacer { flex: 1; }
+        main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+        h1 { font-size: 1.4rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 0.9rem; }
+        th, td { padding: 0.6rem 0.75rem; text-align: left; }
+        th { background: #f8f8fc; font-weight: 600; border-bottom: 2px solid #e2e4ea; }
+        td { border-bottom: 1px solid #eee; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8f9ff; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .mono { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.85em; }
+        .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.8rem; font-weight: 600; text-transform: lowercase; }
+        .badge-running { background: #dcfce7; color: #166534; }
+        .badge-exited { background: #fee2e2; color: #991b1b; }
+        .badge-stopped { background: #fee2e2; color: #991b1b; }
+        .badge-created { background: #fef9c3; color: #854d0e; }
+        .badge-paused { background: #f3e8ff; color: #6b21a8; }
+        .btn { display: inline-block; padding: 0.4rem 0.9rem; border: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: #fff; background: #2563eb; }
+        .btn:hover { background: #1d4ed8; }
+        .btn-warn { background: #ea580c; }
+        .btn-warn:hover { background: #c2410c; }
+        .card { background: #fff; border-radius: 6px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 1rem; }
+        dl.props { display: grid; grid-template-columns: 180px 1fr; gap: 0.4rem 1rem; font-size: 0.9rem; }
+        dl.props dt { font-weight: 600; color: #64748b; }
+        dl.props dd { margin: 0; word-break: break-all; }
+        pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; white-space: pre-wrap; }
+        .empty { color: #94a3b8; font-style: italic; padding: 2rem; text-align: center; }
+        .back { display: inline-block; margin-bottom: 0.75rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="brand">podview</span>
+        <a href="/">Containers</a>
+        <a href="/images">Images</a>
+        <span class="spacer"></span>
+        <form method="POST" action="/auto-update" style="margin:0">
+            <button type="submit" class="btn btn-warn">Auto Update</button>
+        </form>
+    </nav>
+    <main>
+        {{block "content" .}}{{end}}
+    </main>
+</body>
+</html>{{end}}

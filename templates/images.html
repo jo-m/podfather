@@ -1,0 +1,25 @@
+{{define "content"}}
+<h1>Images</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tags</th>
+            <th>Size</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Images}}
+        <tr>
+            <td class="mono">{{shortID .ID}}</td>
+            <td class="mono">{{if .RepoTags}}{{join .RepoTags ", "}}{{else}}&lt;none&gt;{{end}}</td>
+            <td>{{humanSize .Size}}</td>
+            <td>{{formatUnix .Created}}</td>
+        </tr>
+        {{else}}
+        <tr><td colspan="4" class="empty">No images found.</td></tr>
+        {{end}}
+    </tbody>
+</table>
+{{end}}

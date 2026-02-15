@@ -1,0 +1,14 @@
+{{define "content"}}
+<a href="/" class="back">&larr; Back to containers</a>
+<h1>Auto Update</h1>
+<div class="card">
+    {{if .Error}}
+    <p style="color: #dc2626; font-weight: 600;">Error: {{.Error}}</p>
+    {{end}}
+    {{if .Output}}
+    <pre>{{.Output}}</pre>
+    {{else}}
+    <p class="empty">No output.</p>
+    {{end}}
+</div>
+{{end}}

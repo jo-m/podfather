@@ -1,0 +1,108 @@
+{{define "content"}}
+<a href="/" class="back">&larr; Back to containers</a>
+<h1>{{.Container.Name}}</h1>
+
+<div class="card">
+    <h2>General</h2>
+    <dl class="props">
+        <dt>ID</dt>
+        <dd class="mono">{{.Container.ID}}</dd>
+        <dt>Name</dt>
+        <dd>{{.Container.Name}}</dd>
+        <dt>Image</dt>
+        <dd class="mono">{{.Container.ImageName}}</dd>
+        <dt>State</dt>
+        <dd><span class="badge badge-{{.Container.State.Status}}">{{.Container.State.Status}}</span></dd>
+        <dt>Created</dt>
+        <dd>{{formatTime .Container.Created}}</dd>
+        <dt>Started</dt>
+        <dd>{{formatTime .Container.State.StartedAt}}</dd>
+        {{if not .Container.State.Running}}
+        <dt>Finished</dt>
+        <dd>{{formatTime .Container.State.FinishedAt}}</dd>
+        <dt>Exit Code</dt>
+        <dd>{{.Container.State.ExitCode}}</dd>
+        {{end}}
+        <dt>Command</dt>
+        <dd class="mono">{{join .Container.Config.Cmd " "}}</dd>
+        <dt>Restart Count</dt>
+        <dd>{{.Container.RestartCount}}</dd>
+        {{if .Container.HostConfig}}
+        <dt>Restart Policy</dt>
+        <dd>{{.Container.HostConfig.RestartPolicy.Name}}</dd>
+        {{end}}
+        {{if .Container.State.Health}}
+        <dt>Health</dt>
+        <dd>{{.Container.State.Health.Status}}</dd>
+        {{end}}
+    </dl>
+</div>
+
+{{if .Container.NetworkSettings}}{{if .Container.NetworkSettings.Ports}}
+<div class="card">
+    <h2>Ports</h2>
+    <table>
+        <thead>
+            <tr><th>Container Port</th><th>Host Binding</th></tr>
+        </thead>
+        <tbody>
+            {{range $port, $bindings := .Container.NetworkSettings.Ports}}
+            {{if $bindings}}
+            {{range $bindings}}
+            <tr>
+                <td class="mono">{{$port}}</td>
+                <td class="mono">{{.HostIP}}:{{.HostPort}}</td>
+            </tr>
+            {{end}}
+            {{else}}
+            <tr>
+                <td class="mono">{{$port}}</td>
+                <td class="mono">-</td>
+            </tr>
+            {{end}}
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}{{end}}
+
+{{if .Container.Mounts}}
+<div class="card">
+    <h2>Mounts</h2>
+    <table>
+        <thead>
+            <tr><th>Type</th><th>Source</th><th>Destination</th><th>RW</th></tr>
+        </thead>
+        <tbody>
+            {{range .Container.Mounts}}
+            <tr>
+                <td>{{.Type}}</td>
+                <td class="mono">{{.Source}}</td>
+                <td class="mono">{{.Destination}}</td>
+                <td>{{if .RW}}yes{{else}}no{{end}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+
+{{if .Container.Config.Labels}}
+<div class="card">
+    <h2>Labels</h2>
+    <table>
+        <thead>
+            <tr><th>Key</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {{range $k, $v := .Container.Config.Labels}}
+            <tr>
+                <td class="mono">{{$k}}</td>
+                <td class="mono">{{$v}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+{{end}}
