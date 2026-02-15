@@ -1,0 +1,14 @@
+[Install]
+WantedBy=default.target
+
+[Service]
+Environment=LISTEN_ADDR=127.0.0.1:30120
+Environment=PODMAN_SOCKET=%t/podman/podman.sock
+ExecStart=/usr/bin/podview
+Restart=on-failure
+RestartSec=5
+
+[Unit]
+After=podman.socket
+Description=Simple podman web dashboard 🫛
+Requires=podman.socket

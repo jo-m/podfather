@@ -38,6 +38,15 @@ The server starts on `:8080` by default and connects to the rootless Podman sock
 | `LISTEN_ADDR` | `:8080` | HTTP listen address |
 | `PODMAN_SOCKET` | `$XDG_RUNTIME_DIR/podman/podman.sock` | Path to the Podman API socket |
 
+### Running as a systemd user service
+
+A sample unit file is provided in [`podview.service`](podview.service). Install it with:
+
+```
+cp podview.service ~/.config/systemd/user/
+systemctl --user enable --now podview
+```
+
 ### Enabling the Podman socket
 
 For rootless Podman, enable the socket with:
