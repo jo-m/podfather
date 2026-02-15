@@ -47,10 +47,10 @@
 <body>
     <nav>
         <span class="brand">🫛 podview</span>
-        <a href="/">Containers</a>
-        <a href="/images">Images</a>
+        <a href="{{basePath}}/">Containers</a>
+        <a href="{{basePath}}/images">Images</a>
         <span class="spacer"></span>
-        <form method="POST" action="/auto-update" style="margin:0">
+        <form method="POST" action="{{basePath}}/auto-update" style="margin:0">
             <button type="submit" class="btn btn-warn">Trigger Auto Update</button>
         </form>
     </nav>

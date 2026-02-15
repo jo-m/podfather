@@ -48,3 +48,4 @@ curl -s http://localhost:18923/container/<ID>
 
 - `LISTEN_ADDR` — listen address (default `:8080`)
 - `PODMAN_SOCKET` — override socket path (default `$XDG_RUNTIME_DIR/podman/podman.sock`)
+- `BASE_PATH` — URL path prefix for hosting at a subpath (e.g. `/podview`), no trailing slash

@@ -29,6 +29,7 @@ var funcMap = template.FuncMap{
 	"mapKeys":            mapKeys,
 	"envName":            envName,
 	"envValue":           envValue,
+	"basePath":           func() string { return basePath },
 }
 
 func joinStrings(elems any, sep string) string {

@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -24,6 +25,8 @@ func reqID(ctx context.Context) string {
 	return "-"
 }
 
+var basePath string
+
 func main() {
 	sock := socketPath()
 	initPodmanClient(sock)
@@ -33,6 +36,8 @@ func main() {
 		addr = a
 	}
 
+	basePath = strings.TrimRight(os.Getenv("BASE_PATH"), "/")
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", handleContainers)
 	mux.HandleFunc("GET /container/{id}", handleContainer)
@@ -40,8 +45,13 @@ func main() {
 	mux.HandleFunc("GET /image/{id}", handleImage)
 	mux.HandleFunc("POST /auto-update", handleAutoUpdate)
 
-	log.Printf("podview listening on %s (socket: %s)", addr, sock)
-	log.Fatal(http.ListenAndServe(addr, logRequests(mux)))
+	var handler http.Handler = mux
+	if basePath != "" {
+		handler = http.StripPrefix(basePath, mux)
+	}
+
+	log.Printf("podview listening on %s (socket: %s, base: %s)", addr, sock, basePath)
+	log.Fatal(http.ListenAndServe(addr, logRequests(handler)))
 }
 
 type statusWriter struct {
