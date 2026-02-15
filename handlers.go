@@ -21,7 +21,8 @@ var funcMap = template.FuncMap{
 	"humanSize":   humanSize,
 	"formatUnix":  formatUnix,
 	"formatTime":  formatTime,
-	"formatPorts": formatPorts,
+	"formatPorts":        formatPorts,
+	"formatExposedPorts": formatExposedPorts,
 	"firstName":   firstName,
 	"join":        strings.Join,
 }
@@ -82,6 +83,20 @@ func formatPorts(ports []Port) string {
 		}
 		parts = append(parts, s)
 	}
+	return strings.Join(parts, ", ")
+}
+
+func formatExposedPorts(ep map[string][]string) string {
+	if len(ep) == 0 {
+		return ""
+	}
+	var parts []string
+	for port, protos := range ep {
+		for _, proto := range protos {
+			parts = append(parts, port+"/"+proto)
+		}
+	}
+	sort.Strings(parts)
 	return strings.Join(parts, ", ")
 }
 

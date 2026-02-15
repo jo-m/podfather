@@ -15,7 +15,8 @@ type Container struct {
 	Created time.Time `json:"Created"`
 	State   string    `json:"State"`
 	Status  string    `json:"Status"`
-	Ports   []Port    `json:"Ports"`
+	Ports        []Port              `json:"Ports"`
+	ExposedPorts map[string][]string `json:"ExposedPorts"`
 }
 
 type Port struct {

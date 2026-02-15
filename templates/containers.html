@@ -20,7 +20,7 @@
             <td class="mono">{{join .Command " "}}</td>
             <td>{{formatTime .Created}}</td>
             <td><span class="badge badge-{{.State}}">{{.State}}</span></td>
-            <td class="mono">{{formatPorts .Ports}}</td>
+            <td class="mono">{{if .Ports}}{{formatPorts .Ports}}{{else}}{{formatExposedPorts .ExposedPorts}}{{end}}</td>
             <td><a href="/container/{{.ID}}">{{firstName .Names}}</a></td>
         </tr>
         {{else}}
