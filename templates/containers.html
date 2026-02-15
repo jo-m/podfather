@@ -16,12 +16,12 @@
         {{range .Containers}}
         <tr>
             <td class="mono"><a href="/container/{{.ID}}">{{shortID .ID}}</a></td>
-            <td class="mono">{{.Image}}</td>
+            <td class="mono"><a href="/image/{{.ImageID}}">{{.Image}}</a></td>
             <td class="mono">{{join .Command " "}}</td>
             <td>{{formatTime .Created}}</td>
-            <td><span class="badge badge-{{.State}}">{{.Status}}</span></td>
+            <td><span class="badge badge-{{.State}}">{{.State}}</span></td>
             <td class="mono">{{formatPorts .Ports}}</td>
-            <td>{{firstName .Names}}</td>
+            <td><a href="/container/{{.ID}}">{{firstName .Names}}</a></td>
         </tr>
         {{else}}
         <tr><td colspan="7" class="empty">No containers found.</td></tr>

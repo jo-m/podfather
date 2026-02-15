@@ -10,6 +10,7 @@ type Container struct {
 	ID      string    `json:"Id"`
 	Names   []string  `json:"Names"`
 	Image   string    `json:"Image"`
+	ImageID string    `json:"ImageID"`
 	Command []string  `json:"Command"`
 	Created time.Time `json:"Created"`
 	State   string    `json:"State"`
@@ -28,6 +29,7 @@ type ContainerInspect struct {
 	ID              string           `json:"Id"`
 	Name            string           `json:"Name"`
 	Created         time.Time        `json:"Created"`
+	Image           string           `json:"Image"`
 	ImageName       string           `json:"ImageName"`
 	State           ContainerState   `json:"State"`
 	Config          ContainerConfig  `json:"Config"`
@@ -88,4 +90,26 @@ type ImageSummary struct {
 	RepoTags []string `json:"RepoTags"`
 	Created  int64    `json:"Created"`
 	Size     int64    `json:"Size"`
+}
+
+type ImageInspect struct {
+	ID          string      `json:"Id"`
+	Digest      string      `json:"Digest"`
+	RepoTags    []string    `json:"RepoTags"`
+	RepoDigests []string    `json:"RepoDigests"`
+	Created     time.Time   `json:"Created"`
+	Author      string      `json:"Author"`
+	Architecture string    `json:"Architecture"`
+	Os          string      `json:"Os"`
+	Size        int64       `json:"Size"`
+	Config      ImageConfig `json:"Config"`
+	Labels      map[string]string `json:"Labels"`
+}
+
+type ImageConfig struct {
+	Cmd        []string `json:"Cmd"`
+	Entrypoint []string `json:"Entrypoint"`
+	WorkingDir string   `json:"WorkingDir"`
+	StopSignal string   `json:"StopSignal"`
+	// Env is intentionally omitted — never show environment variables.
 }

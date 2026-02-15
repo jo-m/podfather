@@ -22,6 +22,7 @@ func main() {
 	mux.HandleFunc("GET /{$}", handleContainers)
 	mux.HandleFunc("GET /container/{id}", handleContainer)
 	mux.HandleFunc("GET /images", handleImages)
+	mux.HandleFunc("GET /image/{id}", handleImage)
 	mux.HandleFunc("POST /auto-update", handleAutoUpdate)
 
 	log.Printf("podview listening on %s (socket: %s)", addr, sock)

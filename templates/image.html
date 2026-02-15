@@ -1,0 +1,82 @@
+{{define "content"}}
+<a href="/images" class="back">&larr; Back to images</a>
+<h1>{{if .Image.RepoTags}}{{index .Image.RepoTags 0}}{{else}}{{shortID .Image.ID}}{{end}}</h1>
+
+<div class="card">
+    <h2>General</h2>
+    <dl class="props">
+        <dt>ID</dt>
+        <dd class="mono">{{.Image.ID}}</dd>
+        <dt>Tags</dt>
+        <dd class="mono">{{if .Image.RepoTags}}{{join .Image.RepoTags ", "}}{{else}}&lt;none&gt;{{end}}</dd>
+        <dt>Digest</dt>
+        <dd class="mono">{{.Image.Digest}}</dd>
+        <dt>Created</dt>
+        <dd>{{formatTime .Image.Created}}</dd>
+        <dt>Size</dt>
+        <dd>{{humanSize .Image.Size}}</dd>
+        <dt>Architecture</dt>
+        <dd>{{.Image.Architecture}}</dd>
+        <dt>OS</dt>
+        <dd>{{.Image.Os}}</dd>
+        {{if .Image.Author}}
+        <dt>Author</dt>
+        <dd>{{.Image.Author}}</dd>
+        {{end}}
+    </dl>
+</div>
+
+<div class="card">
+    <h2>Config</h2>
+    <dl class="props">
+        {{if .Image.Config.Entrypoint}}
+        <dt>Entrypoint</dt>
+        <dd class="mono">{{join .Image.Config.Entrypoint " "}}</dd>
+        {{end}}
+        {{if .Image.Config.Cmd}}
+        <dt>Command</dt>
+        <dd class="mono">{{join .Image.Config.Cmd " "}}</dd>
+        {{end}}
+        {{if .Image.Config.WorkingDir}}
+        <dt>Working Dir</dt>
+        <dd class="mono">{{.Image.Config.WorkingDir}}</dd>
+        {{end}}
+        {{if .Image.Config.StopSignal}}
+        <dt>Stop Signal</dt>
+        <dd>{{.Image.Config.StopSignal}}</dd>
+        {{end}}
+    </dl>
+</div>
+
+{{if .Image.RepoDigests}}
+<div class="card">
+    <h2>Repo Digests</h2>
+    <table>
+        <tbody>
+            {{range .Image.RepoDigests}}
+            <tr><td class="mono">{{.}}</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+
+{{if .Image.Labels}}
+<div class="card">
+    <h2>Labels</h2>
+    <table>
+        <thead>
+            <tr><th>Key</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {{range $k, $v := .Image.Labels}}
+            <tr>
+                <td class="mono">{{$k}}</td>
+                <td class="mono">{{$v}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
+{{end}}

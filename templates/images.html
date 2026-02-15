@@ -12,7 +12,7 @@
     <tbody>
         {{range .Images}}
         <tr>
-            <td class="mono">{{shortID .ID}}</td>
+            <td class="mono"><a href="/image/{{.ID}}">{{shortID .ID}}</a></td>
             <td class="mono">{{if .RepoTags}}{{join .RepoTags ", "}}{{else}}&lt;none&gt;{{end}}</td>
             <td>{{humanSize .Size}}</td>
             <td>{{formatUnix .Created}}</td>

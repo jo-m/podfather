@@ -150,6 +150,26 @@ func handleImages(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleImage(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	var img ImageInspect
+	if err := podmanGet("/images/"+id+"/json", &img); err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	name := ""
+	if len(img.RepoTags) > 0 {
+		name = img.RepoTags[0]
+	}
+	if name == "" {
+		name = shortID(img.ID)
+	}
+	render(w, "image.html", map[string]any{
+		"Title": "Image: " + name,
+		"Image": img,
+	})
+}
+
 func handleAutoUpdate(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
 	defer cancel()

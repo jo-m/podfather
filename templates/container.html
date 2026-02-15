@@ -10,7 +10,9 @@
         <dt>Name</dt>
         <dd>{{.Container.Name}}</dd>
         <dt>Image</dt>
-        <dd class="mono">{{.Container.ImageName}}</dd>
+        <dd class="mono"><a href="/image/{{.Container.Image}}">{{.Container.ImageName}}</a></dd>
+        <dt>Image ID</dt>
+        <dd class="mono">{{shortID .Container.Image}}</dd>
         <dt>State</dt>
         <dd><span class="badge badge-{{.Container.State.Status}}">{{.Container.State.Status}}</span></dd>
         <dt>Created</dt>
