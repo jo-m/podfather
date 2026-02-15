@@ -53,18 +53,33 @@ func humanSize(b int64) string {
 	}
 }
 
-func formatUnix(ts int64) string {
+func timeAgo(t time.Time) string {
+	d := time.Since(t)
+	switch {
+	case d < time.Minute:
+		return fmt.Sprintf("%ds ago", int(d.Seconds()))
+	case d < time.Hour:
+		return fmt.Sprintf("%dm ago", int(d.Minutes()))
+	case d < 24*time.Hour:
+		return fmt.Sprintf("%dh ago", int(d.Hours()))
+	default:
+		return fmt.Sprintf("%dd ago", int(d.Hours()/24))
+	}
+}
+
+func formatUnix(ts int64) template.HTML {
 	if ts == 0 {
 		return "-"
 	}
-	return time.Unix(ts, 0).Format("2006-01-02 15:04:05")
+	t := time.Unix(ts, 0)
+	return template.HTML(fmt.Sprintf(`<span title="%s">%s</span>`, t.Format("2006-01-02 15:04:05 MST"), timeAgo(t)))
 }
 
-func formatTime(t time.Time) string {
+func formatTime(t time.Time) template.HTML {
 	if t.IsZero() {
 		return "-"
 	}
-	return t.Format("2006-01-02 15:04:05")
+	return template.HTML(fmt.Sprintf(`<span title="%s">%s</span>`, t.Format("2006-01-02 15:04:05 MST"), timeAgo(t)))
 }
 
 func formatPorts(ports []Port) string {
