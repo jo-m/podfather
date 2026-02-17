@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -33,6 +34,7 @@ type Server struct {
 	externalApps     []App
 	podmanClient     *http.Client
 	podmanBaseURL    string
+	autoUpdateMu     sync.Mutex
 }
 
 func (s *Server) newMux(podmanBin string) *http.ServeMux {

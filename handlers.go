@@ -550,6 +550,12 @@ func (s *Server) handleAutoUpdate(podmanBin string) http.HandlerFunc {
 			return
 		}
 
+		if !s.autoUpdateMu.TryLock() {
+			http.Error(w, "Update already in progress", http.StatusConflict)
+			return
+		}
+		defer s.autoUpdateMu.Unlock()
+
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
 		defer cancel()
 
