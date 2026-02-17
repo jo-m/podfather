@@ -6,11 +6,39 @@ Connects to the local Podman API socket and renders container and image informat
 
 ## Features
 
+- **Apps dashboard** — start page showing containers as application cards, grouped by category
 - List all containers with state, image, ports, and creation time
 - Inspect container details (command, mounts, ports, labels, restart policy, health)
 - List images with tags and sizes
 - Trigger `podman auto-update`
 - Environment variables and secrets are never displayed
+
+## App labels
+
+Containers with labels prefixed `ch.jo-m.go.podview.app.` appear as apps on the start page. Multiple containers sharing the same `name` are grouped into one app.
+
+| Label | Required | Description | Example |
+|---|---|---|---|
+| `ch.jo-m.go.podview.app.name` | **yes** | App name (used for grouping) | `Nextcloud` |
+| `ch.jo-m.go.podview.app.icon` | no | Emoji icon | `☁️` |
+| `ch.jo-m.go.podview.app.category` | no | Category heading (default: "Uncategorized") | `Productivity` |
+| `ch.jo-m.go.podview.app.sort-index` | no | Sort order within category (default: 0) | `10` |
+| `ch.jo-m.go.podview.app.subtitle` | no | Short subtitle | `Cloud storage` |
+| `ch.jo-m.go.podview.app.description` | no | Longer description | `Self-hosted file sync and share` |
+| `ch.jo-m.go.podview.app.url` | no | URL opened when clicking the card | `https://cloud.example.com` |
+
+Example:
+
+```
+podman run -d \
+  --label ch.jo-m.go.podview.app.name=Nextcloud \
+  --label ch.jo-m.go.podview.app.icon=☁️ \
+  --label ch.jo-m.go.podview.app.category=Productivity \
+  --label ch.jo-m.go.podview.app.sort-index=10 \
+  --label ch.jo-m.go.podview.app.subtitle="Cloud storage" \
+  --label ch.jo-m.go.podview.app.url=https://cloud.example.com \
+  nextcloud:latest
+```
 
 ## Requirements
 

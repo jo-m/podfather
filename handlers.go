@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os/exec"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,6 +31,7 @@ var funcMap = template.FuncMap{
 	"envName":            envName,
 	"envValue":           envValue,
 	"basePath":           func() string { return basePath },
+	"appState":           appState,
 }
 
 func joinStrings(elems any, sep string) string {
@@ -174,6 +176,100 @@ func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 	if err := t.ExecuteTemplate(w, "base", data); err != nil {
 		log.Printf("[%s] render %s: %v", reqID(r.Context()), page, err)
 	}
+}
+
+func appState(containers []Container) string {
+	for _, c := range containers {
+		if c.State == "running" {
+			return "running"
+		}
+	}
+	if len(containers) > 0 {
+		return containers[0].State
+	}
+	return "unknown"
+}
+
+func buildAppCategories(containers []Container) []AppCategory {
+	appMap := make(map[string]*App)
+
+	for _, c := range containers {
+		name := c.Labels[appLabelPrefix+"name"]
+		if name == "" {
+			continue
+		}
+
+		app, exists := appMap[name]
+		if !exists {
+			sortIdx := 0
+			if s := c.Labels[appLabelPrefix+"sort-index"]; s != "" {
+				if v, err := strconv.Atoi(s); err == nil {
+					sortIdx = v
+				}
+			}
+			app = &App{
+				Name:        name,
+				Icon:        c.Labels[appLabelPrefix+"icon"],
+				Category:    c.Labels[appLabelPrefix+"category"],
+				SortIndex:   sortIdx,
+				Subtitle:    c.Labels[appLabelPrefix+"subtitle"],
+				Description: c.Labels[appLabelPrefix+"description"],
+				URL:         c.Labels[appLabelPrefix+"url"],
+			}
+			appMap[name] = app
+		}
+		app.Containers = append(app.Containers, c)
+	}
+
+	catMap := make(map[string][]App)
+	for _, app := range appMap {
+		cat := app.Category
+		if cat == "" {
+			cat = "Uncategorized"
+		}
+		catMap[cat] = append(catMap[cat], *app)
+	}
+
+	for cat := range catMap {
+		apps := catMap[cat]
+		sort.Slice(apps, func(i, j int) bool {
+			if apps[i].SortIndex != apps[j].SortIndex {
+				return apps[i].SortIndex < apps[j].SortIndex
+			}
+			return apps[i].Name < apps[j].Name
+		})
+		catMap[cat] = apps
+	}
+
+	var categories []AppCategory
+	for cat, apps := range catMap {
+		categories = append(categories, AppCategory{Name: cat, Apps: apps})
+	}
+	sort.Slice(categories, func(i, j int) bool {
+		if categories[i].Name == "Uncategorized" {
+			return false
+		}
+		if categories[j].Name == "Uncategorized" {
+			return true
+		}
+		return categories[i].Name < categories[j].Name
+	})
+
+	return categories
+}
+
+func handleApps(w http.ResponseWriter, r *http.Request) {
+	var list []Container
+	if err := podmanGet("/containers/json?all=true", &list); err != nil {
+		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	categories := buildAppCategories(list)
+	render(w, r, "apps.html", map[string]any{
+		"Title":      "Apps",
+		"Categories": categories,
+	})
 }
 
 func handleContainers(w http.ResponseWriter, r *http.Request) {

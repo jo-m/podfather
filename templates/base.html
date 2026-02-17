@@ -42,12 +42,24 @@
         pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; white-space: pre-wrap; }
         .empty { color: #94a3b8; font-style: italic; padding: 2rem; text-align: center; }
         .back { display: inline-block; margin-bottom: 0.75rem; font-size: 0.9rem; }
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .app-card { background: #fff; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.15s; cursor: pointer; }
+        .app-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.12); transform: translateY(-1px); text-decoration: none; }
+        .app-card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .app-icon { font-size: 2rem; line-height: 1; }
+        .app-name { font-weight: 700; font-size: 1.05rem; }
+        .app-subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .app-desc { font-size: 0.85rem; color: #475569; flex: 1; }
+        .app-states { margin-top: 0.75rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .category-title { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #334155; border-bottom: 2px solid #e2e4ea; padding-bottom: 0.3rem; }
+        .category-title:first-child { margin-top: 0; }
     </style>
 </head>
 <body>
     <nav>
         <span class="brand">🫛 podview</span>
-        <a href="{{basePath}}/">Containers</a>
+        <a href="{{basePath}}/">Apps</a>
+        <a href="{{basePath}}/containers">Containers</a>
         <a href="{{basePath}}/images">Images</a>
         <span class="spacer"></span>
         <form method="POST" action="{{basePath}}/auto-update" style="margin:0">

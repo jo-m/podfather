@@ -39,7 +39,8 @@ func main() {
 	basePath = strings.TrimRight(os.Getenv("BASE_PATH"), "/")
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", handleContainers)
+	mux.HandleFunc("GET /{$}", handleApps)
+	mux.HandleFunc("GET /containers", handleContainers)
 	mux.HandleFunc("GET /container/{id}", handleContainer)
 	mux.HandleFunc("GET /images", handleImages)
 	mux.HandleFunc("GET /image/{id}", handleImage)

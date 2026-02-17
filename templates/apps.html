@@ -1,0 +1,27 @@
+{{define "content"}}
+<h1>Apps</h1>
+{{if .Categories}}
+{{range .Categories}}
+<h2 class="category-title">{{.Name}}</h2>
+<div class="app-grid">
+    {{range .Apps}}
+    <a class="app-card"{{if .URL}} href="{{.URL}}" target="_blank" rel="noopener"{{end}}>
+        <div class="app-card-header">
+            {{if .Icon}}<span class="app-icon">{{.Icon}}</span>{{end}}
+            <span class="app-name">{{.Name}}</span>
+        </div>
+        {{if .Subtitle}}<div class="app-subtitle">{{.Subtitle}}</div>{{end}}
+        {{if .Description}}<div class="app-desc">{{.Description}}</div>{{end}}
+        <div class="app-states">
+            {{range .Containers}}
+            <span class="badge badge-{{.State}}" title="{{firstName .Names}}">{{.State}}</span>
+            {{end}}
+        </div>
+    </a>
+    {{end}}
+</div>
+{{end}}
+{{else}}
+<p class="empty">No apps found. Add labels prefixed with <code>ch.jo-m.go.podview.app.</code> to your containers.</p>
+{{end}}
+{{end}}

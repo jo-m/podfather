@@ -18,9 +18,9 @@ Requires the Podman API socket to be running (`systemctl --user start podman.soc
 The app connects to the Podman REST API (libpod) over a Unix socket using stdlib `net/http` — no podman Go module dependency.
 
 - `main.go` — Entry point: server setup and routing.
-- `types.go` — Podman API response structs. `ContainerConfig.Env` is intentionally omitted so env vars are never parsed.
+- `types.go` — Podman API response structs and app-layer types (`App`, `AppCategory`). `ContainerConfig.Env` is intentionally omitted so env vars are never parsed.
 - `podman.go` — Podman API client: socket path resolution, HTTP-over-Unix-socket client, `podmanGet` helper.
-- `handlers.go` — Template embed/rendering, template helper functions, all HTTP handlers.
+- `handlers.go` — Template embed/rendering, template helper functions, all HTTP handlers. `buildAppCategories` extracts containers with `ch.jo-m.go.podview.app.*` labels, groups by name, and sorts by category/sort-index.
 - `templates/` — Go `html/template` files embedded via `go:embed`. `base.html` defines the layout with a `{{block "content"}}` slot; page templates define `"content"`.
 
 ## Key conventions
@@ -29,6 +29,7 @@ The app connects to the Podman REST API (libpod) over a Unix socket using stdlib
 - **No external dependencies.** Only Go stdlib. Do not add third-party modules.
 - **No secrets in UI.** The `Env` field is structurally omitted from `ContainerConfig`. Do not add it or any other field that could expose secrets.
 - **Podman API version** is `v4.0.0` in the URL path (compatible with Podman v4+).
+- **Apps view** is the start page (`GET /`). Containers with `ch.jo-m.go.podview.app.*` labels are grouped into app cards by name, organized by category. The label prefix constant is `appLabelPrefix` in `types.go`.
 - **Auto-update** is done via `exec.Command("podman", "auto-update")`, not the REST API.
 - **CSS** is inline in `templates/base.html`. No CSS framework. Keep it minimal.
 - **Formatting.** Always run `gofmt -w` on all edited `.go` files after making changes.
@@ -39,7 +40,8 @@ No test suite. Smoke test manually:
 
 ```
 LISTEN_ADDR=:18923 ./podview &
-curl -s http://localhost:18923/
+curl -s http://localhost:18923/            # Apps (start page)
+curl -s http://localhost:18923/containers  # Container list
 curl -s http://localhost:18923/images
 curl -s http://localhost:18923/container/<ID>
 ```

@@ -56,6 +56,7 @@ type Container struct {
 	Status       string              `json:"Status"`
 	Ports        []Port              `json:"Ports"`
 	ExposedPorts map[string][]string `json:"ExposedPorts"`
+	Labels       map[string]string   `json:"Labels"`
 }
 
 type Port struct {
@@ -193,4 +194,26 @@ type ImageHistory struct {
 	CreatedBy string    `json:"created_by"`
 	Comment   string    `json:"comment"`
 	Empty     bool      `json:"empty_layer"`
+}
+
+// App label prefix for container metadata.
+const appLabelPrefix = "ch.jo-m.go.podview.app."
+
+// App represents a logical application composed of one or more containers
+// sharing the same app name label.
+type App struct {
+	Name        string
+	Icon        string
+	Category    string
+	SortIndex   int
+	Subtitle    string
+	Description string
+	URL         string
+	Containers  []Container
+}
+
+// AppCategory groups apps under a category heading.
+type AppCategory struct {
+	Name string
+	Apps []App
 }
