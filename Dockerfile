@@ -1,4 +1,5 @@
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY podfather /podfather
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/podfather /podfather
 EXPOSE 8080
 ENTRYPOINT ["/podfather"]
