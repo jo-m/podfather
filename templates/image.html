@@ -132,7 +132,7 @@
             <tr>
                 <td style="white-space:nowrap">{{formatTime .Created}}</td>
                 <td class="mono">{{.CreatedBy}}</td>
-                <td>{{if .Empty}}0 B{{else}}-{{end}}</td>
+                <td>{{humanSize .Size}}</td>
             </tr>
             {{end}}
         </tbody>
