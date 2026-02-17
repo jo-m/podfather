@@ -9,7 +9,7 @@ services:
   podfather:
     image: ghcr.io/jo-m/podfather:latest
     container_name: podfather
-    user: "1000:1000" # FIXME: Adapt this to your actual uid/gid.
+    user: "${UID}:${GID}"
     volumes:
       - ${XDG_RUNTIME_DIR}/podman/podman.sock:/var/run/podman.sock:ro
     ports:
