@@ -252,6 +252,7 @@ func (s *Server) render(w http.ResponseWriter, r *http.Request, page string, dat
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
 	w.Write(buf.Bytes())
 }
 
