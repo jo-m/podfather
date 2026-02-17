@@ -78,6 +78,10 @@ func logRequests(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), reqIDKey, id)
 		r = r.WithContext(ctx)
 
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+
 		start := time.Now()
 		sw := &statusWriter{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(sw, r)
