@@ -496,6 +496,16 @@ func handleImages(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+	sort.Slice(list, func(i, j int) bool {
+		a, b := "", ""
+		if len(list[i].RepoTags) > 0 {
+			a = list[i].RepoTags[0]
+		}
+		if len(list[j].RepoTags) > 0 {
+			b = list[j].RepoTags[0]
+		}
+		return a < b
+	})
 	render(w, r, "images.html", map[string]any{
 		"Title":  "Images",
 		"Images": list,
