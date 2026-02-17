@@ -1,14 +1,19 @@
 # Demo compose file for podfather.
 # Launches podfather alongside fake app containers.
 # Start with: podman compose -f docker-compose.demo.yml up
-# Browse to http://localhost:8080
+# Then run: go run ./ (defaults to http://localhost:8080)
+# Or browse to http://localhost:8090 for the containerized podfather.
 
 include:
   - docker-compose.yml
 
 services:
-  # Override podfather service to add external app env vars.
+  # Override podfather service: use port 8090 to avoid conflicting with `go run ./` on 8080.
   podfather:
+    ports:
+      - "8090:8080"
+    labels:
+      ch.jo-m.go.podfather.app.url: "http://localhost:8090"
     environment:
       PODMAN_SOCKET: /var/run/podman.sock
       LISTEN_ADDR: ":8080"
