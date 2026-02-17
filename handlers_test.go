@@ -2,7 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -302,5 +306,184 @@ func TestShortIDFromFixture(t *testing.T) {
 	got := shortID("sha256:" + list[0].ID)
 	if got != list[0].ID[:12] {
 		t.Errorf("shortID(sha256:...) = %q, want %q", got, list[0].ID[:12])
+	}
+}
+
+func loadTestFixture(t *testing.T, path string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
+}
+
+// newMockPodmanAPI creates an httptest.Server that mocks the Podman REST API,
+// serving test fixtures from testdata/.
+func newMockPodmanAPI(t *testing.T) *httptest.Server {
+	t.Helper()
+	containers := loadTestFixture(t, "testdata/containers.json")
+	containerInspect := loadTestFixture(t, "testdata/container_inspect.json")
+	images := loadTestFixture(t, "testdata/images.json")
+	imageInspect := loadTestFixture(t, "testdata/image_inspect.json")
+
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := r.URL.Path
+		w.Header().Set("Content-Type", "application/json")
+
+		switch {
+		case p == "/v4.0.0/libpod/containers/json":
+			w.Write(containers)
+		case strings.HasSuffix(p, "/json") && strings.HasPrefix(p, "/v4.0.0/libpod/containers/"):
+			// /v4.0.0/libpod/containers/{id}/json
+			id := strings.TrimPrefix(p, "/v4.0.0/libpod/containers/")
+			id = strings.TrimSuffix(id, "/json")
+			if id == "nonexistent" {
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte(`{}`))
+				return
+			}
+			w.Write(containerInspect)
+		case p == "/v4.0.0/libpod/images/json":
+			w.Write(images)
+		case strings.HasSuffix(p, "/json") && strings.HasPrefix(p, "/v4.0.0/libpod/images/"):
+			// /v4.0.0/libpod/images/{id}/json
+			id := strings.TrimPrefix(p, "/v4.0.0/libpod/images/")
+			id = strings.TrimSuffix(id, "/json")
+			if id == "nonexistent" {
+				w.WriteHeader(http.StatusNotFound)
+				w.Write([]byte(`{}`))
+				return
+			}
+			w.Write(imageInspect)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{}`))
+		}
+	}))
+}
+
+func TestEndToEnd(t *testing.T) {
+	// Save and restore globals.
+	origClient := podman
+	origBaseURL := podmanBaseURL
+	origBasePath := basePath
+	origAutoUpdate := enableAutoUpdate
+	t.Cleanup(func() {
+		podman = origClient
+		podmanBaseURL = origBaseURL
+		basePath = origBasePath
+		enableAutoUpdate = origAutoUpdate
+	})
+
+	// Start mock Podman API.
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	podman = mock.Client()
+	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
+	basePath = ""
+	enableAutoUpdate = false
+
+	// Start app server.
+	app := httptest.NewServer(newMux("podman"))
+	defer app.Close()
+
+	// Client that does not follow redirects.
+	noRedirect := &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		wantStatus int
+		wantBody   string // substring to look for in body (empty = just check non-empty)
+	}{
+		{"root redirects to apps", "GET", "/", http.StatusTemporaryRedirect, ""},
+		{"apps page", "GET", "/apps", http.StatusOK, "Jellyfin"},
+		{"containers page", "GET", "/containers", http.StatusOK, "jellyfin"},
+		{"container detail", "GET", "/container/jellyfin", http.StatusOK, "jellyfin"},
+		{"container not found", "GET", "/container/nonexistent", http.StatusNotFound, ""},
+		{"container invalid id", "GET", "/container/!!!invalid", http.StatusBadRequest, ""},
+		{"images page", "GET", "/images", http.StatusOK, "nginx"},
+		{"image detail", "GET", "/image/b76de378d572", http.StatusOK, "nginx"},
+		{"image not found", "GET", "/image/nonexistent", http.StatusNotFound, ""},
+		{"auto-update disabled", "POST", "/auto-update", http.StatusNotFound, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var resp *http.Response
+			var err error
+
+			url := app.URL + tt.path
+			if tt.method == "POST" {
+				resp, err = noRedirect.Post(url, "", nil)
+			} else {
+				resp, err = noRedirect.Get(url)
+			}
+			if err != nil {
+				t.Fatalf("request %s %s: %v", tt.method, tt.path, err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tt.wantStatus {
+				t.Errorf("status = %d, want %d", resp.StatusCode, tt.wantStatus)
+			}
+
+			if tt.wantBody != "" {
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					t.Fatalf("read body: %v", err)
+				}
+				if !strings.Contains(string(body), tt.wantBody) {
+					t.Errorf("body does not contain %q (len=%d)", tt.wantBody, len(body))
+				}
+			}
+		})
+	}
+}
+
+func TestEndToEndAutoUpdate(t *testing.T) {
+	// Save and restore globals.
+	origClient := podman
+	origBaseURL := podmanBaseURL
+	origBasePath := basePath
+	origAutoUpdate := enableAutoUpdate
+	t.Cleanup(func() {
+		podman = origClient
+		podmanBaseURL = origBaseURL
+		basePath = origBasePath
+		enableAutoUpdate = origAutoUpdate
+	})
+
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	podman = mock.Client()
+	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
+	basePath = ""
+	enableAutoUpdate = true
+
+	// Pass "true" as podman binary — a no-op that exits 0.
+	app := httptest.NewServer(newMux("true"))
+	defer app.Close()
+
+	resp, err := http.Post(app.URL+"/auto-update", "", nil)
+	if err != nil {
+		t.Fatalf("POST /auto-update: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if len(body) == 0 {
+		t.Error("empty response body")
 	}
 }

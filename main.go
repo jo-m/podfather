@@ -28,6 +28,18 @@ func reqID(ctx context.Context) string {
 var basePath string
 var enableAutoUpdate bool
 
+func newMux(podmanBin string) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", handleRoot)
+	mux.HandleFunc("GET /apps", handleApps)
+	mux.HandleFunc("GET /containers", handleContainers)
+	mux.HandleFunc("GET /container/{id}", handleContainer)
+	mux.HandleFunc("GET /images", handleImages)
+	mux.HandleFunc("GET /image/{id}", handleImage)
+	mux.HandleFunc("POST /auto-update", handleAutoUpdate(podmanBin))
+	return mux
+}
+
 func main() {
 	sock := socketPath()
 	initPodmanClient(sock)
@@ -40,14 +52,7 @@ func main() {
 	basePath = strings.TrimRight(os.Getenv("BASE_PATH"), "/")
 	enableAutoUpdate = os.Getenv("ENABLE_AUTOUPDATE_BUTTON") == "true"
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", handleRoot)
-	mux.HandleFunc("GET /apps", handleApps)
-	mux.HandleFunc("GET /containers", handleContainers)
-	mux.HandleFunc("GET /container/{id}", handleContainer)
-	mux.HandleFunc("GET /images", handleImages)
-	mux.HandleFunc("GET /image/{id}", handleImage)
-	mux.HandleFunc("POST /auto-update", handleAutoUpdate)
+	mux := newMux("podman")
 
 	var handler http.Handler = mux
 	if basePath != "" {

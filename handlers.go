@@ -403,25 +403,27 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func handleAutoUpdate(w http.ResponseWriter, r *http.Request) {
-	if !enableAutoUpdate {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return
+func handleAutoUpdate(podmanBin string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !enableAutoUpdate {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+		defer cancel()
+
+		cmd := exec.CommandContext(ctx, podmanBin, "auto-update")
+		out, err := cmd.CombinedOutput()
+
+		var errMsg string
+		if err != nil {
+			errMsg = err.Error()
+		}
+		render(w, r, "autoupdate.html", map[string]any{
+			"Title":  "Auto Update",
+			"Output": string(out),
+			"Error":  errMsg,
+		})
 	}
-
-	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, "podman", "auto-update")
-	out, err := cmd.CombinedOutput()
-
-	var errMsg string
-	if err != nil {
-		errMsg = err.Error()
-	}
-	render(w, r, "autoupdate.html", map[string]any{
-		"Title":  "Auto Update",
-		"Output": string(out),
-		"Error":  errMsg,
-	})
 }

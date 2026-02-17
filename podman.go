@@ -16,6 +16,7 @@ import (
 var errNotFound = errors.New("not found")
 
 var podman *http.Client
+var podmanBaseURL = "http://d/v4.0.0/libpod"
 
 func socketPath() string {
 	if s := os.Getenv("PODMAN_SOCKET"); s != "" {
@@ -40,7 +41,7 @@ func initPodmanClient(sock string) {
 }
 
 func podmanGet(path string, result any) error {
-	resp, err := podman.Get("http://d/v4.0.0/libpod" + path)
+	resp, err := podman.Get(podmanBaseURL + path)
 	if err != nil {
 		return fmt.Errorf("podman API: %w", err)
 	}
