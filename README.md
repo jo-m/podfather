@@ -68,24 +68,27 @@ The server starts on `127.0.0.1:8080` (localhost only) by default and connects t
 
 ### Running as a systemd user service
 
-A sample unit file is provided in [`podfather.service`](podfather.service). Install it with:
+A sample unit file is provided in [`support/podfather.service`](support/podfather.service). Install it with:
 
 ```bash
-cp podfather.service ~/.config/systemd/user/
+cp support/podfather.service ~/.config/systemd/user/
 systemctl --user enable --now podfather
 ```
 
-### Running with Docker
+### Running with Docker (Compose)
+
+A sample compose file is provided:
 
 ```bash
-docker run -it --rm \
-  --publish 8080:8080 \
-  --mount "type=bind,source=$XDG_RUNTIME_DIR/podman/podman.sock,target=/var/run/podman.sock" \
-  --env PODMAN_SOCKET=/var/run/podman.sock \
-  --env LISTEN_ADDR=:8080 \
-  --env BASE_PATH= \
-  --user $(id -u):$(id -g) \
-  ghcr.io/jo-m/podfather:latest-amd64
+cd support
+podman-compose up -d
+```
+
+A demo compose file with fake app containers is also available:
+
+```bash
+cd support
+podman-compose -f docker-compose.demo.yml up -d
 ```
 
 ## Creating releases

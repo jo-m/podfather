@@ -1,6 +1,10 @@
 # Demo compose file for podfather.
-# Start with: podman-compose up -d
-# Then run podfather and browse to http://localhost:8080
+# Launches podfather alongside fake app containers.
+# Start with: podman compose -f docker-compose.demo.yml up
+# Browse to http://localhost:8080
+
+include:
+  - docker-compose.yml
 
 services:
   # ── Category: Media ──────────────────────────────────────────────

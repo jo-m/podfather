@@ -35,7 +35,7 @@ The app connects to the Podman REST API over a Unix socket using Go stdlib `net/
 - **Error handling.** Log errors server-side with `log.Printf` and return minimal error messages (e.g. "Internal Server Error") to the client without exposing details.
 - **Formatting.** Always run `gofmt -w` on all edited `.go` files after making changes
 - **Tests.** Run with `go test ./...` after making changes.
-- **Config and usage changes:** When changing ENV vars, CLI flags, etc. always update accordingly 1. README.md 2. systemd unit file 3. this CLAUDE.md.
+- **Config and usage changes:** When changing ENV vars, CLI flags, etc. always update accordingly 1. README.md 2. systemd unit file (`support/podfather.service`) 3. docker-compose files (`support/docker-compose.yml`, `support/docker-compose.demo.yml`) 4. this CLAUDE.md.
 
 ## Testing
 
