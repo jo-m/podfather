@@ -92,6 +92,7 @@ func logRequests(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("Referrer-Policy", "no-referrer")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'self'")
 
 		start := time.Now()
 		sw := &statusWriter{ResponseWriter: w, status: http.StatusOK}
