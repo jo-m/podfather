@@ -85,3 +85,10 @@ docker run -it --rm \
   --user $(id -u):$(id -g) \
   ghcr.io/jo-m/podview:latest-amd64
 ```
+
+## Creating releases
+
+1. Go to the [GitHub Releases page](https://github.com/jo-m/podview/releases) and click **Draft a new release**.
+2. Create a new tag (e.g. `v1.2.0`).
+3. Fill in the release title and description, then click **Publish release**.
+4. The [Release workflow](.github/workflows/release.yml) will automatically build binaries, Docker images, and attach them to the release.

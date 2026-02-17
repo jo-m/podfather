@@ -1,5 +1,8 @@
 version: 2
 
+release:
+  mode: replace
+
 builds:
   - env:
       - CGO_ENABLED=0
