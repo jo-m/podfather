@@ -111,6 +111,7 @@
         <a href="{{basePath}}/images">Images</a>
         <span class="spacer"></span>
         {{if enableAutoUpdate}}<form method="POST" action="{{basePath}}/auto-update" style="margin:0">
+            <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
             <button type="submit" class="btn btn-warn">Trigger Auto Update</button>
         </form>{{end}}
     </nav>

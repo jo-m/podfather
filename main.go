@@ -17,6 +17,7 @@ import (
 type ctxKey int
 
 const reqIDKey ctxKey = 0
+const csrfTokenKey ctxKey = 1
 
 func reqID(ctx context.Context) string {
 	if id, ok := ctx.Value(reqIDKey).(string); ok {
@@ -66,6 +67,7 @@ func main() {
 		host = "localhost" + host
 	}
 	log.Printf("podfather listening on http://%s%s (socket: %s)", host, basePath, sock)
+	handler = csrfProtect(handler)
 	log.Fatal(http.ListenAndServe(addr, logRequests(handler)))
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"embed"
 	"errors"
 	"fmt"
@@ -193,12 +194,56 @@ func init() {
 	}
 }
 
+const csrfCookieName = "_csrf"
+const csrfFormField = "_csrf"
+
+func generateCSRFToken() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		panic("csrf: " + err.Error())
+	}
+	return fmt.Sprintf("%x", b)
+}
+
+func csrfProtect(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var token string
+		if c, err := r.Cookie(csrfCookieName); err == nil && len(c.Value) == 64 {
+			token = c.Value
+		} else {
+			token = generateCSRFToken()
+			http.SetCookie(w, &http.Cookie{
+				Name:     csrfCookieName,
+				Value:    token,
+				Path:     basePath + "/",
+				HttpOnly: true,
+				SameSite: http.SameSiteStrictMode,
+			})
+		}
+
+		if r.Method == http.MethodPost {
+			if r.FormValue(csrfFormField) != token {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+		}
+
+		ctx := context.WithValue(r.Context(), csrfTokenKey, token)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 	t := pageTemplates[page]
 	if t == nil {
 		log.Printf("[%s] unknown template %s", reqID(r.Context()), page)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+	if m, ok := data.(map[string]any); ok {
+		if token, ok := r.Context().Value(csrfTokenKey).(string); ok {
+			m["CSRFToken"] = token
+		}
 	}
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "base", data); err != nil {

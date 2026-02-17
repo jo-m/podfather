@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -473,10 +474,35 @@ func TestEndToEndAutoUpdate(t *testing.T) {
 	externalApps = nil
 
 	// Pass "true" as podman binary — a no-op that exits 0.
-	app := httptest.NewServer(newMux("true"))
+	app := httptest.NewServer(csrfProtect(newMux("true")))
 	defer app.Close()
 
-	resp, err := http.Post(app.URL+"/auto-update", "", nil)
+	// GET a page to obtain the CSRF cookie.
+	resp, err := http.Get(app.URL + "/apps")
+	if err != nil {
+		t.Fatalf("GET /apps: %v", err)
+	}
+	resp.Body.Close()
+	var csrfCookie *http.Cookie
+	for _, c := range resp.Cookies() {
+		if c.Name == csrfCookieName {
+			csrfCookie = c
+			break
+		}
+	}
+	if csrfCookie == nil {
+		t.Fatal("no CSRF cookie set")
+	}
+
+	// POST with matching CSRF token.
+	form := url.Values{csrfFormField: {csrfCookie.Value}}
+	req, err := http.NewRequest("POST", app.URL+"/auto-update", strings.NewReader(form.Encode()))
+	if err != nil {
+		t.Fatalf("create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(csrfCookie)
+	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("POST /auto-update: %v", err)
 	}
@@ -765,4 +791,112 @@ func TestEndToEndExternalApps(t *testing.T) {
 	if !strings.Contains(bodyStr, "Jellyfin") {
 		t.Error("apps page does not contain container app 'Jellyfin'")
 	}
+}
+
+func TestCSRFProtection(t *testing.T) {
+	origClient := podman
+	origBaseURL := podmanBaseURL
+	origBasePath := basePath
+	origAutoUpdate := enableAutoUpdate
+	origExtApps := externalApps
+	t.Cleanup(func() {
+		podman = origClient
+		podmanBaseURL = origBaseURL
+		basePath = origBasePath
+		enableAutoUpdate = origAutoUpdate
+		externalApps = origExtApps
+	})
+
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	podman = mock.Client()
+	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
+	basePath = ""
+	enableAutoUpdate = true
+	externalApps = nil
+
+	app := httptest.NewServer(csrfProtect(newMux("true")))
+	defer app.Close()
+
+	t.Run("GET sets CSRF cookie", func(t *testing.T) {
+		resp, err := http.Get(app.URL + "/apps")
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		var found bool
+		for _, c := range resp.Cookies() {
+			if c.Name == csrfCookieName {
+				found = true
+				if len(c.Value) != 64 {
+					t.Errorf("CSRF cookie length = %d, want 64", len(c.Value))
+				}
+				if !c.HttpOnly {
+					t.Error("CSRF cookie should be HttpOnly")
+				}
+			}
+		}
+		if !found {
+			t.Error("CSRF cookie not set")
+		}
+	})
+
+	t.Run("POST without token returns 403", func(t *testing.T) {
+		resp, err := http.Post(app.URL+"/auto-update", "", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusForbidden {
+			t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusForbidden)
+		}
+	})
+
+	t.Run("POST with mismatched token returns 403", func(t *testing.T) {
+		token := strings.Repeat("ab", 32)
+		form := url.Values{csrfFormField: {"wrong"}}
+		req, _ := http.NewRequest("POST", app.URL+"/auto-update", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.AddCookie(&http.Cookie{Name: csrfCookieName, Value: token})
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusForbidden {
+			t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusForbidden)
+		}
+	})
+
+	t.Run("POST with valid token succeeds", func(t *testing.T) {
+		resp, err := http.Get(app.URL + "/apps")
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		var csrfCookie *http.Cookie
+		for _, c := range resp.Cookies() {
+			if c.Name == csrfCookieName {
+				csrfCookie = c
+				break
+			}
+		}
+		if csrfCookie == nil {
+			t.Fatal("no CSRF cookie")
+		}
+
+		form := url.Values{csrfFormField: {csrfCookie.Value}}
+		req, _ := http.NewRequest("POST", app.URL+"/auto-update", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.AddCookie(csrfCookie)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
+		}
+	})
 }
