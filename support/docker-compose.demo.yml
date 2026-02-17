@@ -4,12 +4,14 @@
 # Then run: go run ./ (defaults to http://localhost:8080)
 # Or browse to http://localhost:8090 for the containerized podfather.
 
-include:
-  - docker-compose.yml
-
 services:
-  # Override podfather service: use port 8090 to avoid conflicting with `go run ./` on 8080.
+  # Use port 8090 to avoid conflicting with `go run ./` on 8080.
   podfather:
+    image: ghcr.io/jo-m/podfather:latest
+    container_name: podfather
+    user: "${UID}:${GID}"
+    volumes:
+      - ${XDG_RUNTIME_DIR}/podman/podman.sock:/var/run/podman.sock:ro
     ports:
       - "8090:8080"
     labels:
