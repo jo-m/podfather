@@ -7,43 +7,44 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫛</text></svg>">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; color: #1a1a2e; background: #f0f0f5; }
-        nav { background: #1a1a2e; color: #ccc; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; }
-        nav a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; }
+        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #1a1a2e; background: #f0f0f5; -webkit-text-size-adjust: 100%; }
+        nav { background: #1a1a2e; color: #ccc; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        nav a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.25rem 0.25rem; }
         nav a:hover { color: #fff; }
         .brand { font-weight: 700; font-size: 1.1rem; color: #e2e8f0; letter-spacing: -0.02em; }
         .spacer { flex: 1; }
         main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
         h1 { font-size: 1.4rem; margin-bottom: 1rem; }
         h2 { font-size: 1.1rem; margin-bottom: 0.75rem; }
-        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 0.9rem; }
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.9rem; }
         th, td { padding: 0.6rem 0.75rem; text-align: left; }
-        th { background: #f8f8fc; font-weight: 600; border-bottom: 2px solid #e2e4ea; }
+        th { background: #f8f8fc; font-weight: 600; border-bottom: 2px solid #e2e4ea; position: sticky; top: 0; }
         td { border-bottom: 1px solid #eee; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f8f9ff; }
         a { color: #2563eb; text-decoration: none; }
         a:hover { text-decoration: underline; }
         .mono { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.85em; }
-        .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.8rem; font-weight: 600; text-transform: lowercase; }
+        .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; text-transform: lowercase; }
         .badge-running { background: #dcfce7; color: #166534; }
         .badge-exited { background: #fee2e2; color: #991b1b; }
         .badge-stopped { background: #fee2e2; color: #991b1b; }
         .badge-created { background: #fef9c3; color: #854d0e; }
         .badge-paused { background: #f3e8ff; color: #6b21a8; }
-        .btn { display: inline-block; padding: 0.4rem 0.9rem; border: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: #fff; background: #2563eb; }
+        .btn { display: inline-block; padding: 0.45rem 1rem; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: #fff; background: #2563eb; }
         .btn:hover { background: #1d4ed8; }
         .btn-warn { background: #ea580c; }
         .btn-warn:hover { background: #c2410c; }
-        .card { background: #fff; border-radius: 6px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 1rem; }
-        dl.props { display: grid; grid-template-columns: 180px 1fr; gap: 0.4rem 1rem; font-size: 0.9rem; }
+        .card { background: #fff; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 1rem; }
+        dl.props { display: grid; grid-template-columns: minmax(auto, 180px) 1fr; gap: 0.4rem 1rem; font-size: 0.9rem; }
         dl.props dt { font-weight: 600; color: #64748b; }
-        dl.props dd { margin: 0; word-break: break-all; }
-        pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; white-space: pre-wrap; }
+        dl.props dd { margin: 0; word-break: break-all; min-width: 0; }
+        pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; }
         .empty { color: #94a3b8; font-style: italic; padding: 2rem; text-align: center; }
         .back { display: inline-block; margin-bottom: 0.75rem; font-size: 0.9rem; }
-        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .app-card { background: #fff; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; transition: box-shadow 0.15s, transform 0.15s; }
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .app-card { background: #fff; border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; transition: box-shadow 0.15s, transform 0.15s; }
         .app-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.12); transform: translateY(-1px); }
         a.app-card-body { text-decoration: none; color: inherit; cursor: pointer; flex: 1; }
         a.app-card-body:hover { text-decoration: none; }
@@ -58,6 +59,18 @@
         .app-states .badge:hover { opacity: 0.8; text-decoration: underline; }
         .category-title { font-size: 1.15rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #334155; border-bottom: 2px solid #e2e4ea; padding-bottom: 0.3rem; }
         .category-title:first-child { margin-top: 0; }
+        @media (max-width: 640px) {
+            nav { gap: 0.5rem; padding: 0.6rem 0.75rem; }
+            main { margin: 1rem auto; padding: 0 0.5rem; }
+            h1 { font-size: 1.2rem; }
+            .card { padding: 1rem; border-radius: 8px; }
+            dl.props { grid-template-columns: 1fr; gap: 0.2rem; }
+            dl.props dt { color: #64748b; font-size: 0.8rem; margin-top: 0.5rem; }
+            dl.props dt:first-child { margin-top: 0; }
+            dl.props dd { padding-bottom: 0.4rem; border-bottom: 1px solid #f0f0f5; }
+            th, td { padding: 0.5rem 0.6rem; font-size: 0.82rem; }
+            .btn { padding: 0.5rem 0.9rem; }
+        }
     </style>
 </head>
 <body>

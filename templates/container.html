@@ -116,6 +116,7 @@
 {{if .Container.NetworkSettings}}{{if .Container.NetworkSettings.Ports}}
 <div class="card">
     <h2>Ports</h2>
+    <div class="table-wrap">
     <table>
         <thead>
             <tr><th>Container Port</th><th>Host Binding</th></tr>
@@ -138,12 +139,14 @@
             {{end}}
         </tbody>
     </table>
+    </div>
 </div>
 {{end}}{{end}}
 
 {{if .Container.Mounts}}
 <div class="card">
     <h2>Mounts</h2>
+    <div class="table-wrap">
     <table>
         <thead>
             <tr><th>Type</th><th>Source</th><th>Destination</th><th>RW</th></tr>
@@ -159,12 +162,14 @@
             {{end}}
         </tbody>
     </table>
+    </div>
 </div>
 {{end}}
 
 {{if .Container.Config.Labels}}
 <div class="card">
     <h2>Labels</h2>
+    <div class="table-wrap">
     <table>
         <thead>
             <tr><th>Key</th><th>Value</th></tr>
@@ -178,12 +183,14 @@
             {{end}}
         </tbody>
     </table>
+    </div>
 </div>
 {{end}}
 
 {{if .Container.Config.Annotations}}
 <div class="card">
     <h2>Annotations</h2>
+    <div class="table-wrap">
     <table>
         <thead>
             <tr><th>Key</th><th>Value</th></tr>
@@ -197,6 +204,7 @@
             {{end}}
         </tbody>
     </table>
+    </div>
 </div>
 {{end}}
 {{end}}
