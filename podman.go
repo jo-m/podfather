@@ -52,5 +52,7 @@ func (s *Server) podmanGet(path string, result any) error {
 		io.Copy(io.Discard, resp.Body)
 		return fmt.Errorf("podman API %s: %s", path, resp.Status)
 	}
-	return json.NewDecoder(resp.Body).Decode(result)
+	err = json.NewDecoder(resp.Body).Decode(result)
+	io.Copy(io.Discard, resp.Body)
+	return err
 }
