@@ -258,6 +258,22 @@ func buildAppCategories(containers []Container) []AppCategory {
 	return categories
 }
 
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	var list []Container
+	if err := podmanGet("/containers/json?all=true", &list); err != nil {
+		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	for _, c := range list {
+		if c.Labels[appLabelPrefix+"name"] != "" {
+			http.Redirect(w, r, basePath+"/apps", http.StatusTemporaryRedirect)
+			return
+		}
+	}
+	http.Redirect(w, r, basePath+"/containers", http.StatusTemporaryRedirect)
+}
+
 func handleApps(w http.ResponseWriter, r *http.Request) {
 	var list []Container
 	if err := podmanGet("/containers/json?all=true", &list); err != nil {
