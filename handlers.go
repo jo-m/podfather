@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"sort"
@@ -221,6 +222,79 @@ func appState(containers []Container) string {
 	return "unknown"
 }
 
+// parseExternalApps reads PODFATHER_APP_<KEY>_<FIELD> environment variables
+// and returns App structs for each unique key that has at least a NAME field.
+// Known suffixes: _NAME, _URL, _ICON, _CATEGORY, _SORT_INDEX, _SUBTITLE, _DESCRIPTION.
+// The <KEY> portion may contain underscores; suffixes are matched from the end.
+func parseExternalApps() []App {
+	const prefix = "PODFATHER_APP_"
+	suffixes := []struct {
+		suffix string
+		field  string
+	}{
+		{"_DESCRIPTION", "description"},
+		{"_SORT_INDEX", "sort-index"},
+		{"_CATEGORY", "category"},
+		{"_SUBTITLE", "subtitle"},
+		{"_NAME", "name"},
+		{"_ICON", "icon"},
+		{"_URL", "url"},
+	}
+
+	fields := make(map[string]map[string]string)
+	for _, env := range os.Environ() {
+		eqIdx := strings.IndexByte(env, '=')
+		if eqIdx < 0 {
+			continue
+		}
+		varName := env[:eqIdx]
+		value := env[eqIdx+1:]
+
+		if !strings.HasPrefix(varName, prefix) {
+			continue
+		}
+		rest := varName[len(prefix):]
+
+		for _, s := range suffixes {
+			if strings.HasSuffix(rest, s.suffix) {
+				key := rest[:len(rest)-len(s.suffix)]
+				if key == "" {
+					break
+				}
+				if fields[key] == nil {
+					fields[key] = make(map[string]string)
+				}
+				fields[key][s.field] = value
+				break
+			}
+		}
+	}
+
+	var apps []App
+	for _, f := range fields {
+		name := f["name"]
+		if name == "" {
+			continue
+		}
+		sortIdx := 0
+		if s := f["sort-index"]; s != "" {
+			if v, err := strconv.Atoi(s); err == nil {
+				sortIdx = v
+			}
+		}
+		apps = append(apps, App{
+			Name:        name,
+			Icon:        f["icon"],
+			Category:    f["category"],
+			SortIndex:   sortIdx,
+			Subtitle:    f["subtitle"],
+			Description: f["description"],
+			URL:         f["url"],
+		})
+	}
+	return apps
+}
+
 func buildAppCategories(containers []Container) []AppCategory {
 	appMap := make(map[string]*App)
 
@@ -250,6 +324,14 @@ func buildAppCategories(containers []Container) []AppCategory {
 			appMap[name] = app
 		}
 		app.Containers = append(app.Containers, c)
+	}
+
+	// Merge external apps (container-based apps take priority on name collision).
+	for i := range externalApps {
+		if _, exists := appMap[externalApps[i].Name]; !exists {
+			a := externalApps[i]
+			appMap[a.Name] = &a
+		}
 	}
 
 	catMap := make(map[string][]App)
@@ -290,6 +372,10 @@ func buildAppCategories(containers []Container) []AppCategory {
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
+	if len(externalApps) > 0 {
+		http.Redirect(w, r, basePath+"/apps", http.StatusTemporaryRedirect)
+		return
+	}
 	var list []Container
 	if err := podmanGet("/containers/json?all=true", &list); err != nil {
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)

@@ -7,6 +7,27 @@ include:
   - docker-compose.yml
 
 services:
+  # Override podfather service to add external app env vars.
+  podfather:
+    environment:
+      PODMAN_SOCKET: /var/run/podman.sock
+      LISTEN_ADDR: ":8080"
+      # External apps (shown on dashboard without a container)
+      PODFATHER_APP_ROUTER_NAME: "Router"
+      PODFATHER_APP_ROUTER_ICON: "📡"
+      PODFATHER_APP_ROUTER_CATEGORY: "Infrastructure"
+      PODFATHER_APP_ROUTER_SORT_INDEX: "10"
+      PODFATHER_APP_ROUTER_SUBTITLE: "Network Router"
+      PODFATHER_APP_ROUTER_DESCRIPTION: "Router admin interface"
+      PODFATHER_APP_ROUTER_URL: "http://192.168.1.1"
+      PODFATHER_APP_NAS_NAME: "NAS"
+      PODFATHER_APP_NAS_ICON: "💾"
+      PODFATHER_APP_NAS_CATEGORY: "Infrastructure"
+      PODFATHER_APP_NAS_SORT_INDEX: "11"
+      PODFATHER_APP_NAS_SUBTITLE: "Network Storage"
+      PODFATHER_APP_NAS_DESCRIPTION: "Synology NAS"
+      PODFATHER_APP_NAS_URL: "http://192.168.1.2"
+
   # ── Category: Media ──────────────────────────────────────────────
 
   jellyfin:

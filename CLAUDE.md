@@ -29,7 +29,7 @@ The app connects to the Podman REST API over a Unix socket using Go stdlib `net/
 - **No external dependencies.** Only Go stdlib. Do not add third-party modules.
 - **No secrets in UI.** The `Env` field is omitted from `ContainerConfig`. Do not add it or any other field that could expose secrets.
 - **Podman API version** is `v4.0.0` in the URL path (compatible with Podman v4+).
-- **Apps view** at (`GET /apps`). Containers with `ch.jo-m.go.podfather.app.*` (`const appLabelPrefix` in `types.go`) labels are grouped into app cards by name, organized by category.
+- **Apps view** at (`GET /apps`). Containers with `ch.jo-m.go.podfather.app.*` (`const appLabelPrefix` in `types.go`) labels are grouped into app cards by name, organized by category. External (non-container) apps can also be defined via `PODFATHER_APP_<KEY>_<FIELD>` env vars (parsed in `parseExternalApps()` in `handlers.go`).
 - **Auto-update** is done via `exec.Command("podman", "auto-update")`, not the REST API. Disabled by default; enable with `ENABLE_AUTOUPDATE_BUTTON=true`.
 - **CSS** is inline in `templates/base.html`. No CSS framework. Keep it minimal.
 - **Error handling.** Log errors server-side with `log.Printf` and return minimal error messages (e.g. "Internal Server Error") to the client without exposing details.

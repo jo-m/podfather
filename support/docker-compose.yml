@@ -23,4 +23,8 @@ services:
       LISTEN_ADDR: ":8080"
       # ENABLE_AUTOUPDATE_BUTTON: "true"
       # BASE_PATH: "/podfather"
+      # External apps (shown on dashboard without a container):
+      # PODFATHER_APP_ROUTER_NAME: "Router"
+      # PODFATHER_APP_ROUTER_ICON: "📡"
+      # PODFATHER_APP_ROUTER_URL: "http://192.168.1.1"
     restart: unless-stopped

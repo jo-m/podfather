@@ -7,6 +7,12 @@ Requires=podman.socket
 Environment=LISTEN_ADDR=127.0.0.1:30120
 Environment=PODMAN_SOCKET=%t/podman/podman.sock
 # Environment=ENABLE_AUTOUPDATE_BUTTON=true
+
+# Show external apps on dashboard:
+# Environment=PODFATHER_APP_ROUTER_NAME=Router
+# Environment=PODFATHER_APP_ROUTER_ICON=📡
+# Environment=PODFATHER_APP_ROUTER_URL=http://192.168.1.1
+
 ExecStart=/usr/bin/podfather
 Restart=on-failure
 RestartSec=5

@@ -27,6 +27,7 @@ func reqID(ctx context.Context) string {
 
 var basePath string
 var enableAutoUpdate bool
+var externalApps []App
 
 func newMux(podmanBin string) *http.ServeMux {
 	mux := http.NewServeMux()
@@ -51,6 +52,7 @@ func main() {
 
 	basePath = strings.TrimRight(os.Getenv("BASE_PATH"), "/")
 	enableAutoUpdate = os.Getenv("ENABLE_AUTOUPDATE_BUTTON") == "true"
+	externalApps = parseExternalApps()
 
 	mux := newMux("podman")
 

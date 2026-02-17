@@ -43,6 +43,32 @@ podman run -d \
   nextcloud:latest
 ```
 
+## External apps
+
+You can also add apps to the dashboard that are not running as Podman containers (e.g. a network router, NAS, or external service). Define them via environment variables using the pattern `PODFATHER_APP_<KEY>_<FIELD>`, where `<KEY>` is any unique identifier (may contain underscores) and `<FIELD>` is one of:
+
+| Field | Required | Description | Example |
+|---|---|---|---|
+| `NAME` | **yes** | App name | `Router` |
+| `ICON` | no | Emoji icon | `📡` |
+| `CATEGORY` | no | Category heading (default: "Uncategorized") | `Infrastructure` |
+| `SORT_INDEX` | no | Sort order within category (default: 0) | `10` |
+| `SUBTITLE` | no | Short subtitle | `Network Router` |
+| `DESCRIPTION` | no | Longer description | `Router admin interface` |
+| `URL` | no | URL opened when clicking the card | `http://192.168.1.1` |
+
+Example:
+
+```bash
+export PODFATHER_APP_ROUTER_NAME=Router
+export PODFATHER_APP_ROUTER_ICON=📡
+export PODFATHER_APP_ROUTER_CATEGORY=Infrastructure
+export PODFATHER_APP_ROUTER_URL=http://192.168.1.1
+export PODFATHER_APP_ROUTER_SUBTITLE="Network Router"
+```
+
+If an external app has the same name as a container-based app, the container-based app takes priority.
+
 ## Building, Installation, and Usage
 
 ```bash

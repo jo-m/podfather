@@ -369,11 +369,13 @@ func TestEndToEnd(t *testing.T) {
 	origBaseURL := podmanBaseURL
 	origBasePath := basePath
 	origAutoUpdate := enableAutoUpdate
+	origExtApps := externalApps
 	t.Cleanup(func() {
 		podman = origClient
 		podmanBaseURL = origBaseURL
 		basePath = origBasePath
 		enableAutoUpdate = origAutoUpdate
+		externalApps = origExtApps
 	})
 
 	// Start mock Podman API.
@@ -384,6 +386,7 @@ func TestEndToEnd(t *testing.T) {
 	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
 	basePath = ""
 	enableAutoUpdate = false
+	externalApps = nil
 
 	// Start app server.
 	app := httptest.NewServer(newMux("podman"))
@@ -454,11 +457,13 @@ func TestEndToEndAutoUpdate(t *testing.T) {
 	origBaseURL := podmanBaseURL
 	origBasePath := basePath
 	origAutoUpdate := enableAutoUpdate
+	origExtApps := externalApps
 	t.Cleanup(func() {
 		podman = origClient
 		podmanBaseURL = origBaseURL
 		basePath = origBasePath
 		enableAutoUpdate = origAutoUpdate
+		externalApps = origExtApps
 	})
 
 	mock := newMockPodmanAPI(t)
@@ -468,6 +473,7 @@ func TestEndToEndAutoUpdate(t *testing.T) {
 	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
 	basePath = ""
 	enableAutoUpdate = true
+	externalApps = nil
 
 	// Pass "true" as podman binary — a no-op that exits 0.
 	app := httptest.NewServer(newMux("true"))
@@ -485,5 +491,285 @@ func TestEndToEndAutoUpdate(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	if len(body) == 0 {
 		t.Error("empty response body")
+	}
+}
+
+func TestParseExternalApps(t *testing.T) {
+	envs := map[string]string{
+		"PODFATHER_APP_ROUTER_NAME":        "Router",
+		"PODFATHER_APP_ROUTER_URL":         "http://192.168.1.1",
+		"PODFATHER_APP_ROUTER_ICON":        "📡",
+		"PODFATHER_APP_ROUTER_CATEGORY":    "Infrastructure",
+		"PODFATHER_APP_ROUTER_SORT_INDEX":  "5",
+		"PODFATHER_APP_ROUTER_SUBTITLE":    "Network Router",
+		"PODFATHER_APP_ROUTER_DESCRIPTION": "Router admin interface",
+		"PODFATHER_APP_NAS_NAME":           "NAS",
+		"PODFATHER_APP_NAS_URL":            "http://192.168.1.2",
+		// Key with underscores.
+		"PODFATHER_APP_MY_APP_NAME": "My App",
+		"PODFATHER_APP_MY_APP_URL":  "http://example.com",
+		// Missing NAME — should be skipped.
+		"PODFATHER_APP_NONAME_URL": "http://skip.me",
+		// Empty key — should be skipped.
+		"PODFATHER_APP__NAME": "BadKey",
+	}
+	for k, v := range envs {
+		t.Setenv(k, v)
+	}
+
+	apps := parseExternalApps()
+
+	// Should have 3 apps: Router, NAS, My App (NONAME and empty key skipped).
+	if len(apps) != 3 {
+		t.Fatalf("got %d apps, want 3", len(apps))
+	}
+
+	byName := make(map[string]App)
+	for _, a := range apps {
+		byName[a.Name] = a
+	}
+
+	router, ok := byName["Router"]
+	if !ok {
+		t.Fatal("Router app not found")
+	}
+	if router.URL != "http://192.168.1.1" {
+		t.Errorf("Router URL = %q", router.URL)
+	}
+	if router.Icon != "📡" {
+		t.Errorf("Router Icon = %q", router.Icon)
+	}
+	if router.Category != "Infrastructure" {
+		t.Errorf("Router Category = %q", router.Category)
+	}
+	if router.SortIndex != 5 {
+		t.Errorf("Router SortIndex = %d, want 5", router.SortIndex)
+	}
+	if router.Subtitle != "Network Router" {
+		t.Errorf("Router Subtitle = %q", router.Subtitle)
+	}
+	if router.Description != "Router admin interface" {
+		t.Errorf("Router Description = %q", router.Description)
+	}
+	if len(router.Containers) != 0 {
+		t.Errorf("Router Containers = %d, want 0", len(router.Containers))
+	}
+
+	nas, ok := byName["NAS"]
+	if !ok {
+		t.Fatal("NAS app not found")
+	}
+	if nas.URL != "http://192.168.1.2" {
+		t.Errorf("NAS URL = %q", nas.URL)
+	}
+
+	myApp, ok := byName["My App"]
+	if !ok {
+		t.Fatal("My App not found (key with underscores)")
+	}
+	if myApp.URL != "http://example.com" {
+		t.Errorf("My App URL = %q", myApp.URL)
+	}
+}
+
+func TestBuildAppCategoriesWithExternalApps(t *testing.T) {
+	origExtApps := externalApps
+	t.Cleanup(func() { externalApps = origExtApps })
+
+	externalApps = []App{
+		{
+			Name:     "Router",
+			Icon:     "📡",
+			Category: "Infrastructure",
+			URL:      "http://192.168.1.1",
+		},
+		{
+			Name:     "Wiki",
+			Icon:     "📖",
+			Category: "Docs",
+			URL:      "http://wiki.example.com",
+		},
+	}
+
+	list := loadTestContainers(t)
+	categories := buildAppCategories(list)
+
+	// Should now have: Docs, Infrastructure, Media, Monitoring, Uncategorized.
+	wantCats := []string{"Docs", "Infrastructure", "Media", "Monitoring", "Uncategorized"}
+	if len(categories) != len(wantCats) {
+		var got []string
+		for _, c := range categories {
+			got = append(got, c.Name)
+		}
+		t.Fatalf("got categories %v, want %v", got, wantCats)
+	}
+	for i, want := range wantCats {
+		if categories[i].Name != want {
+			t.Errorf("category[%d] = %q, want %q", i, categories[i].Name, want)
+		}
+	}
+
+	// Infrastructure should have Traefik, Gitea, Router.
+	var infra AppCategory
+	for _, c := range categories {
+		if c.Name == "Infrastructure" {
+			infra = c
+			break
+		}
+	}
+	if len(infra.Apps) != 3 {
+		t.Fatalf("Infrastructure has %d apps, want 3", len(infra.Apps))
+	}
+	// Router has no containers.
+	var router *App
+	for i := range infra.Apps {
+		if infra.Apps[i].Name == "Router" {
+			router = &infra.Apps[i]
+			break
+		}
+	}
+	if router == nil {
+		t.Fatal("Router not found in Infrastructure")
+	}
+	if len(router.Containers) != 0 {
+		t.Errorf("Router has %d containers, want 0", len(router.Containers))
+	}
+	if router.URL != "http://192.168.1.1" {
+		t.Errorf("Router URL = %q", router.URL)
+	}
+
+	// Wiki should be in Docs category.
+	var docs AppCategory
+	for _, c := range categories {
+		if c.Name == "Docs" {
+			docs = c
+			break
+		}
+	}
+	if len(docs.Apps) != 1 || docs.Apps[0].Name != "Wiki" {
+		t.Errorf("Docs category = %v, want [Wiki]", docs.Apps)
+	}
+}
+
+func TestExternalAppContainerPriority(t *testing.T) {
+	origExtApps := externalApps
+	t.Cleanup(func() { externalApps = origExtApps })
+
+	// External app with same name as a container app — container should take priority.
+	externalApps = []App{
+		{
+			Name:     "Jellyfin",
+			URL:      "http://external.example.com",
+			Category: "External",
+		},
+	}
+
+	list := loadTestContainers(t)
+	categories := buildAppCategories(list)
+
+	// Jellyfin should still be in Media (from container labels), not External.
+	var jellyfin *App
+	for _, cat := range categories {
+		for i := range cat.Apps {
+			if cat.Apps[i].Name == "Jellyfin" {
+				jellyfin = &cat.Apps[i]
+			}
+		}
+	}
+	if jellyfin == nil {
+		t.Fatal("Jellyfin not found")
+	}
+	if jellyfin.Category != "Media" {
+		t.Errorf("Jellyfin category = %q, want Media (container takes priority)", jellyfin.Category)
+	}
+	if jellyfin.URL != "http://localhost:8096" {
+		t.Errorf("Jellyfin URL = %q, want container URL", jellyfin.URL)
+	}
+	if len(jellyfin.Containers) == 0 {
+		t.Error("Jellyfin should have containers (from container labels)")
+	}
+
+	// No "External" category should exist.
+	for _, cat := range categories {
+		if cat.Name == "External" {
+			t.Error("External category should not exist (container takes priority)")
+		}
+	}
+}
+
+func TestEndToEndExternalApps(t *testing.T) {
+	// Save and restore globals.
+	origClient := podman
+	origBaseURL := podmanBaseURL
+	origBasePath := basePath
+	origAutoUpdate := enableAutoUpdate
+	origExtApps := externalApps
+	t.Cleanup(func() {
+		podman = origClient
+		podmanBaseURL = origBaseURL
+		basePath = origBasePath
+		enableAutoUpdate = origAutoUpdate
+		externalApps = origExtApps
+	})
+
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	podman = mock.Client()
+	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
+	basePath = ""
+	enableAutoUpdate = false
+	externalApps = []App{
+		{
+			Name:     "Router",
+			Icon:     "📡",
+			Category: "Infrastructure",
+			URL:      "http://192.168.1.1",
+			Subtitle: "Network Router",
+		},
+	}
+
+	app := httptest.NewServer(newMux("podman"))
+	defer app.Close()
+
+	noRedirect := &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	// Root should redirect to /apps (external apps present).
+	resp, err := noRedirect.Get(app.URL + "/")
+	if err != nil {
+		t.Fatalf("GET /: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusTemporaryRedirect {
+		t.Errorf("GET / status = %d, want %d", resp.StatusCode, http.StatusTemporaryRedirect)
+	}
+
+	// Apps page should contain the external app.
+	resp, err = http.Get(app.URL + "/apps")
+	if err != nil {
+		t.Fatalf("GET /apps: %v", err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("GET /apps status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+	bodyStr := string(body)
+	if !strings.Contains(bodyStr, "Router") {
+		t.Error("apps page does not contain external app 'Router'")
+	}
+	if !strings.Contains(bodyStr, "📡") {
+		t.Error("apps page does not contain Router icon")
+	}
+	if !strings.Contains(bodyStr, "http://192.168.1.1") {
+		t.Error("apps page does not contain Router URL")
+	}
+	// Should also still contain container-based apps.
+	if !strings.Contains(bodyStr, "Jellyfin") {
+		t.Error("apps page does not contain container app 'Jellyfin'")
 	}
 }
