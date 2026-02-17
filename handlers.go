@@ -169,12 +169,33 @@ func firstName(names []string) string {
 // validID matches container and image IDs (hex, sha256: prefix, or name-like identifiers).
 var validID = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.:-]*$`)
 
+var pageTemplates map[string]*template.Template
+
+func init() {
+	pages := []string{
+		"apps.html",
+		"autoupdate.html",
+		"container.html",
+		"containers.html",
+		"image.html",
+		"images.html",
+	}
+	pageTemplates = make(map[string]*template.Template, len(pages))
+	for _, page := range pages {
+		t, err := template.New("").Funcs(funcMap).ParseFS(
+			templateFS, "templates/base.html", "templates/"+page,
+		)
+		if err != nil {
+			log.Fatalf("parse template %s: %v", page, err)
+		}
+		pageTemplates[page] = t
+	}
+}
+
 func render(w http.ResponseWriter, r *http.Request, page string, data any) {
-	t, err := template.New("").Funcs(funcMap).ParseFS(
-		templateFS, "templates/base.html", "templates/"+page,
-	)
-	if err != nil {
-		log.Printf("[%s] template parse %s: %v", reqID(r.Context()), page, err)
+	t := pageTemplates[page]
+	if t == nil {
+		log.Printf("[%s] unknown template %s", reqID(r.Context()), page)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
