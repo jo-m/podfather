@@ -101,17 +101,17 @@ type Health struct {
 }
 
 type ContainerConfig struct {
-	Hostname      string              `json:"Hostname"`
-	Image         string              `json:"Image"`
-	User          string              `json:"User"`
-	Cmd           []string            `json:"Cmd"`
-	Entrypoint    StringOrSlice       `json:"Entrypoint"`
-	WorkingDir    string              `json:"WorkingDir"`
-	StopSignal    FlexString          `json:"StopSignal"`
-	Labels        map[string]string   `json:"Labels"`
-	Annotations   map[string]string   `json:"Annotations"`
-	ExposedPorts  map[string]struct{} `json:"ExposedPorts"`
-	CreateCommand []string            `json:"CreateCommand"`
+	Hostname     string              `json:"Hostname"`
+	Image        string              `json:"Image"`
+	User         string              `json:"User"`
+	Cmd          []string            `json:"Cmd"`
+	Entrypoint   StringOrSlice       `json:"Entrypoint"`
+	WorkingDir   string              `json:"WorkingDir"`
+	StopSignal   FlexString          `json:"StopSignal"`
+	Labels       map[string]string   `json:"Labels"`
+	Annotations  map[string]string   `json:"Annotations"`
+	ExposedPorts map[string]struct{} `json:"ExposedPorts"`
+	// CreateCommand is intentionally omitted — may contain secrets in args.
 	// Env is intentionally omitted — never show environment variables.
 }
 

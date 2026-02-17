@@ -74,12 +74,6 @@
     </dl>
 </div>
 
-{{if .Container.Config.CreateCommand}}
-<div class="card">
-    <h2>Create Command</h2>
-    <pre>{{join .Container.Config.CreateCommand " "}}</pre>
-</div>
-{{end}}
 
 {{if .Container.HostConfig}}
 <div class="card">
