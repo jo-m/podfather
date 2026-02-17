@@ -4,28 +4,26 @@
 <table>
     <thead>
         <tr>
+            <th>Names</th>
             <th>Container ID</th>
             <th>Image</th>
-            <th>Command</th>
             <th>Created</th>
             <th>Status</th>
             <th>Ports</th>
-            <th>Names</th>
         </tr>
     </thead>
     <tbody>
         {{range .Containers}}
         <tr>
+            <td><a href="{{basePath}}/container/{{.ID}}">{{firstName .Names}}</a></td>
             <td class="mono"><a href="{{basePath}}/container/{{.ID}}">{{shortID .ID}}</a></td>
             <td class="mono"><a href="{{basePath}}/image/{{.ImageID}}">{{.Image}}</a></td>
-            <td class="mono">{{join .Command " "}}</td>
             <td>{{formatTime .Created}}</td>
             <td><span class="badge badge-{{.State}}">{{.State}}</span></td>
             <td class="mono">{{if .Ports}}{{formatPorts .Ports}}{{else}}{{formatExposedPorts .ExposedPorts}}{{end}}</td>
-            <td><a href="{{basePath}}/container/{{.ID}}">{{firstName .Names}}</a></td>
         </tr>
         {{else}}
-        <tr><td colspan="7" class="empty">No containers found.</td></tr>
+        <tr><td colspan="6" class="empty">No containers found.</td></tr>
         {{end}}
     </tbody>
 </table>
