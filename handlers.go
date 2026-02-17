@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"embed"
 	"errors"
 	"fmt"
@@ -220,7 +221,7 @@ func (s *Server) csrfProtect(next http.Handler) http.Handler {
 		}
 
 		if r.Method == http.MethodPost {
-			if r.FormValue(csrfFormField) != token {
+			if subtle.ConstantTimeCompare([]byte(r.FormValue(csrfFormField)), []byte(token)) != 1 {
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
