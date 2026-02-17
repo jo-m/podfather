@@ -54,13 +54,13 @@ go build -o podview .
 ./podview
 ```
 
-The server starts on `:8080` by default and connects to the rootless Podman socket.
+The server starts on `127.0.0.1:8080` (localhost only) by default and connects to the rootless Podman socket.
 
 ### Environment variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `LISTEN_ADDR` | `:8080` | HTTP listen address |
+| `LISTEN_ADDR` | `127.0.0.1:8080` | HTTP listen address |
 | `PODMAN_SOCKET` | `$XDG_RUNTIME_DIR/podman/podman.sock` | Path to the Podman API socket |
 | `BASE_PATH` | _(none)_ | URL path prefix for hosting at a subpath (e.g. `/podview`), no trailing slash |
 
