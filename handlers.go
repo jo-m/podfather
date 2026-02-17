@@ -33,6 +33,7 @@ var funcMap = template.FuncMap{
 	"envName":            envName,
 	"envValue":           envValue,
 	"basePath":           func() string { return basePath },
+	"enableAutoUpdate":   func() bool { return enableAutoUpdate },
 	"appState":           appState,
 }
 
@@ -382,6 +383,11 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleAutoUpdate(w http.ResponseWriter, r *http.Request) {
+	if !enableAutoUpdate {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
 	defer cancel()
 

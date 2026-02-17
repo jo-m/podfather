@@ -6,6 +6,7 @@ Requires=podman.socket
 [Service]
 Environment=LISTEN_ADDR=127.0.0.1:30120
 Environment=PODMAN_SOCKET=%t/podman/podman.sock
+# Environment=ENABLE_AUTOUPDATE_BUTTON=true
 ExecStart=/usr/bin/podview
 Restart=on-failure
 RestartSec=5

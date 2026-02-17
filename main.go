@@ -26,6 +26,7 @@ func reqID(ctx context.Context) string {
 }
 
 var basePath string
+var enableAutoUpdate bool
 
 func main() {
 	sock := socketPath()
@@ -37,6 +38,7 @@ func main() {
 	}
 
 	basePath = strings.TrimRight(os.Getenv("BASE_PATH"), "/")
+	enableAutoUpdate = os.Getenv("ENABLE_AUTOUPDATE_BUTTON") == "true"
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", handleRoot)

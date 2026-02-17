@@ -80,9 +80,9 @@
         <a href="{{basePath}}/containers">Containers</a>
         <a href="{{basePath}}/images">Images</a>
         <span class="spacer"></span>
-        <form method="POST" action="{{basePath}}/auto-update" style="margin:0">
+        {{if enableAutoUpdate}}<form method="POST" action="{{basePath}}/auto-update" style="margin:0">
             <button type="submit" class="btn btn-warn">Trigger Auto Update</button>
-        </form>
+        </form>{{end}}
     </nav>
     <main>
         {{block "content" .}}{{end}}

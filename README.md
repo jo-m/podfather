@@ -63,6 +63,7 @@ The server starts on `127.0.0.1:8080` (localhost only) by default and connects t
 | `LISTEN_ADDR` | `127.0.0.1:8080` | HTTP listen address |
 | `PODMAN_SOCKET` | `$XDG_RUNTIME_DIR/podman/podman.sock` | Path to the Podman API socket |
 | `BASE_PATH` | _(none)_ | URL path prefix for hosting at a subpath (e.g. `/podview`), no trailing slash |
+| `ENABLE_AUTOUPDATE_BUTTON` | _(none)_ | Set to `true` to allow triggering `podman auto-update` from the web UI |
 
 ### Running as a systemd user service
 
