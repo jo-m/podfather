@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"embed"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -163,6 +165,9 @@ func firstName(names []string) string {
 	return ""
 }
 
+// validID matches container and image IDs (hex, sha256: prefix, or name-like identifiers).
+var validID = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.:-]*$`)
+
 func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 	t, err := template.New("").Funcs(funcMap).ParseFS(
 		templateFS, "templates/base.html", "templates/"+page,
@@ -172,10 +177,14 @@ func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := t.ExecuteTemplate(w, "base", data); err != nil {
+	var buf bytes.Buffer
+	if err := t.ExecuteTemplate(&buf, "base", data); err != nil {
 		log.Printf("[%s] render %s: %v", reqID(r.Context()), page, err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(buf.Bytes())
 }
 
 func appState(containers []Container) string {
@@ -306,6 +315,10 @@ func handleContainers(w http.ResponseWriter, r *http.Request) {
 
 func handleContainer(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+	if !validID.MatchString(id) {
+		http.Error(w, "Invalid container ID", http.StatusBadRequest)
+		return
+	}
 	var c ContainerInspect
 	if err := podmanGet("/containers/"+id+"/json", &c); err != nil {
 		if errors.Is(err, errNotFound) {
@@ -341,6 +354,10 @@ func handleImages(w http.ResponseWriter, r *http.Request) {
 
 func handleImage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+	if !validID.MatchString(id) {
+		http.Error(w, "Invalid image ID", http.StatusBadRequest)
+		return
+	}
 	var img ImageInspect
 	if err := podmanGet("/images/"+id+"/json", &img); err != nil {
 		if errors.Is(err, errNotFound) {
