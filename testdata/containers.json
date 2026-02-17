@@ -1,0 +1,654 @@
+[
+    {
+        "AutoRemove": false,
+        "Command": [
+            "nginx",
+            "-g",
+            "daemon off;"
+        ],
+        "Created": "2026-02-17T06:10:38.082874722+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305473,
+        "ExitCode": 0,
+        "ExposedPorts": {
+            "80": [
+                "tcp"
+            ]
+        },
+        "Id": "e69755008ef41fcc992fcdf95a98de8cb30a81f6db2025ef6bb2df21379cb43e",
+        "Image": "docker.io/library/nginx:alpine",
+        "ImageID": "b76de378d57272a1dd9091a05dd548a3639dfb792ebdbf95d06704d2950afdea",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Media",
+            "ch.jo-m.go.podview.app.description": "Stream your media library",
+            "ch.jo-m.go.podview.app.icon": "\ud83c\udfac",
+            "ch.jo-m.go.podview.app.name": "Jellyfin",
+            "ch.jo-m.go.podview.app.sort-index": "1",
+            "ch.jo-m.go.podview.app.subtitle": "Media Server",
+            "ch.jo-m.go.podview.app.url": "http://localhost:8096",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "jellyfin",
+            "io.containers.autoupdate": "registry",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "jellyfin",
+            "io.podman.compose.version": "1.5.0",
+            "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>"
+        },
+        "Mounts": [
+            "/etc/nginx"
+        ],
+        "Names": [
+            "jellyfin"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 202679,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": [
+            {
+                "host_ip": "",
+                "container_port": 80,
+                "host_port": 8096,
+                "range": 1,
+                "protocol": "tcp"
+            }
+        ],
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "httpd-foreground"
+        ],
+        "Created": "2026-02-17T06:10:41.068380972+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305473,
+        "ExitCode": 0,
+        "ExposedPorts": {
+            "80": [
+                "tcp"
+            ]
+        },
+        "Id": "38ae056ebd1ccd8303d639d1422dc5fccf7fec9f349102d5f839a4d7e8736986",
+        "Image": "docker.io/library/httpd:alpine",
+        "ImageID": "df42812185067773433a9206d7b87e58547d4c2749b8d61a62eb0cdf72bee956",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Media",
+            "ch.jo-m.go.podview.app.description": "Personal music streaming",
+            "ch.jo-m.go.podview.app.icon": "\ud83c\udfb5",
+            "ch.jo-m.go.podview.app.name": "Navidrome",
+            "ch.jo-m.go.podview.app.sort-index": "2",
+            "ch.jo-m.go.podview.app.subtitle": "Music Server",
+            "ch.jo-m.go.podview.app.url": "http://localhost:4533",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "navidrome",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "navidrome",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "navidrome"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 202528,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": [
+            {
+                "host_ip": "",
+                "container_port": 80,
+                "host_port": 4533,
+                "range": 1,
+                "protocol": "tcp"
+            }
+        ],
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "nginx",
+            "-g",
+            "daemon off;"
+        ],
+        "Created": "2026-02-17T06:10:41.150537735+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305473,
+        "ExitCode": 0,
+        "ExposedPorts": {
+            "80": [
+                "tcp"
+            ]
+        },
+        "Id": "4a789dde592371a4d3aa17b8cdf1b13cbf74307dbeaec0286486cc91ce486a01",
+        "Image": "docker.io/library/nginx:alpine",
+        "ImageID": "b76de378d57272a1dd9091a05dd548a3639dfb792ebdbf95d06704d2950afdea",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Infrastructure",
+            "ch.jo-m.go.podview.app.description": "Self-hosted Git service",
+            "ch.jo-m.go.podview.app.icon": "\ud83c\udf75",
+            "ch.jo-m.go.podview.app.name": "Gitea",
+            "ch.jo-m.go.podview.app.sort-index": "1",
+            "ch.jo-m.go.podview.app.subtitle": "Git Hosting",
+            "ch.jo-m.go.podview.app.url": "http://localhost:3000",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "gitea-web",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "gitea-web",
+            "io.podman.compose.version": "1.5.0",
+            "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>"
+        },
+        "Mounts": [],
+        "Names": [
+            "gitea-web"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 202775,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": [
+            {
+                "host_ip": "",
+                "container_port": 80,
+                "host_port": 3000,
+                "range": 1,
+                "protocol": "tcp"
+            }
+        ],
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "sleep",
+            "infinity"
+        ],
+        "Created": "2026-02-17T06:10:43.630084946+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305514,
+        "ExitCode": 0,
+        "ExposedPorts": null,
+        "Id": "9ba77cfe4bec5bffe1fae013f3743c2e2a55267b930c46e78d1dad64923e0cdf",
+        "Image": "docker.io/library/alpine:latest",
+        "ImageID": "a40c03cbb81c59bfb0e0887ab0b1859727075da7b9cc576a1cec2c771f38c5fb",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Infrastructure",
+            "ch.jo-m.go.podview.app.name": "Gitea",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "gitea-db",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "gitea-db",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "gitea-db"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 203056,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": null,
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "nginx",
+            "-g",
+            "daemon off;"
+        ],
+        "Created": "2026-02-17T06:10:43.730378437+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305473,
+        "ExitCode": 0,
+        "ExposedPorts": {
+            "80": [
+                "tcp"
+            ]
+        },
+        "Id": "e3e60afd923bd5b733f9a127980209fad9bb13d825d144ea40b5da191553dcb6",
+        "Image": "docker.io/library/nginx:alpine",
+        "ImageID": "b76de378d57272a1dd9091a05dd548a3639dfb792ebdbf95d06704d2950afdea",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Infrastructure",
+            "ch.jo-m.go.podview.app.description": "Edge router & load balancer",
+            "ch.jo-m.go.podview.app.icon": "\ud83d\udd00",
+            "ch.jo-m.go.podview.app.name": "Traefik",
+            "ch.jo-m.go.podview.app.sort-index": "0",
+            "ch.jo-m.go.podview.app.subtitle": "Reverse Proxy",
+            "ch.jo-m.go.podview.app.url": "http://localhost:8088",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "traefik",
+            "io.containers.autoupdate": "registry",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "traefik",
+            "io.podman.compose.version": "1.5.0",
+            "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>"
+        },
+        "Mounts": [],
+        "Names": [
+            "traefik"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 203144,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": [
+            {
+                "host_ip": "",
+                "container_port": 80,
+                "host_port": 8088,
+                "range": 1,
+                "protocol": "tcp"
+            },
+            {
+                "host_ip": "",
+                "container_port": 443,
+                "host_port": 8443,
+                "range": 1,
+                "protocol": "tcp"
+            }
+        ],
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "httpd-foreground"
+        ],
+        "Created": "2026-02-17T06:10:43.815310646+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305473,
+        "ExitCode": 0,
+        "ExposedPorts": {
+            "80": [
+                "tcp"
+            ]
+        },
+        "Id": "7741dd8fb447e7a7012d357795337a895f0032277fda8acf861e20007771d9de",
+        "Image": "docker.io/library/httpd:alpine",
+        "ImageID": "df42812185067773433a9206d7b87e58547d4c2749b8d61a62eb0cdf72bee956",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Monitoring",
+            "ch.jo-m.go.podview.app.description": "Metrics visualization",
+            "ch.jo-m.go.podview.app.icon": "\ud83d\udcca",
+            "ch.jo-m.go.podview.app.name": "Grafana",
+            "ch.jo-m.go.podview.app.sort-index": "1",
+            "ch.jo-m.go.podview.app.subtitle": "Dashboards",
+            "ch.jo-m.go.podview.app.url": "http://localhost:3001",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "grafana",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "grafana",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "grafana"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 202940,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": [
+            {
+                "host_ip": "",
+                "container_port": 80,
+                "host_port": 3001,
+                "range": 1,
+                "protocol": "tcp"
+            }
+        ],
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "sleep",
+            "infinity"
+        ],
+        "Created": "2026-02-17T06:10:43.900335167+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305504,
+        "ExitCode": 0,
+        "ExposedPorts": null,
+        "Id": "d696d8fa60f8b27fe5771c6a6d0ac2e793bb22905bcec7d39c535e799c9ccd6f",
+        "Image": "docker.io/library/alpine:latest",
+        "ImageID": "a40c03cbb81c59bfb0e0887ab0b1859727075da7b9cc576a1cec2c771f38c5fb",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.category": "Monitoring",
+            "ch.jo-m.go.podview.app.description": "Time series monitoring",
+            "ch.jo-m.go.podview.app.icon": "\ud83d\udd25",
+            "ch.jo-m.go.podview.app.name": "Prometheus",
+            "ch.jo-m.go.podview.app.sort-index": "2",
+            "ch.jo-m.go.podview.app.subtitle": "Metrics",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "prometheus",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "prometheus",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "prometheus"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 202458,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": null,
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "httpd",
+            "-f",
+            "-p",
+            "80"
+        ],
+        "Created": "2026-02-17T06:10:46.428661751+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305524,
+        "ExitCode": 0,
+        "ExposedPorts": null,
+        "Id": "c7ba69548f35af00a353ff2e9da47aa0ec76b1acc501c9fb9047d7ab0615ab9b",
+        "Image": "docker.io/library/busybox:latest",
+        "ImageID": "af3f0f48a24edb84e94aff6f44f5d089203453719d3b2328486d311e61db9b09",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "ch.jo-m.go.podview.app.description": "Returns request info",
+            "ch.jo-m.go.podview.app.icon": "\ud83d\udc4b",
+            "ch.jo-m.go.podview.app.name": "Whoami",
+            "ch.jo-m.go.podview.app.subtitle": "Debug endpoint",
+            "ch.jo-m.go.podview.app.url": "http://localhost:8089",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "whoami",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "whoami",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "whoami"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 203319,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": [
+            {
+                "host_ip": "",
+                "container_port": 80,
+                "host_port": 8089,
+                "range": 1,
+                "protocol": "tcp"
+            }
+        ],
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305535,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "sleep",
+            "infinity"
+        ],
+        "Created": "2026-02-17T06:10:46.521284912+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305494,
+        "ExitCode": 0,
+        "ExposedPorts": null,
+        "Id": "4666782ab7479d5d9e518d93087d77631db44ccf457ee6b71cc907ea699c0021",
+        "Image": "docker.io/library/alpine:latest",
+        "ImageID": "a40c03cbb81c59bfb0e0887ab0b1859727075da7b9cc576a1cec2c771f38c5fb",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "redis",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "redis",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "redis"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 203252,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": null,
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "echo",
+            "done"
+        ],
+        "Created": "2026-02-17T06:10:46.61173136+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": true,
+        "ExitedAt": 1771305534,
+        "ExitCode": 0,
+        "ExposedPorts": null,
+        "Id": "2c0bc62d3d6173b7ce0b0eb88a5160496131cbd06c7da296cfa143ec4f85361b",
+        "Image": "docker.io/library/alpine:latest",
+        "ImageID": "a40c03cbb81c59bfb0e0887ab0b1859727075da7b9cc576a1cec2c771f38c5fb",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "batch-job",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "batch-job",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [],
+        "Names": [
+            "batch-job"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 0,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": null,
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "exited",
+        "Status": ""
+    },
+    {
+        "AutoRemove": false,
+        "Command": [
+            "sleep",
+            "infinity"
+        ],
+        "Created": "2026-02-17T06:10:46.807282202+01:00",
+        "CreatedAt": "",
+        "CIDFile": "",
+        "Exited": false,
+        "ExitedAt": 1771305484,
+        "ExitCode": 0,
+        "ExposedPorts": null,
+        "Id": "5f209ac0c3711aea4338ec6efd32cc4c14bf9739df621547ca64b29355d874b9",
+        "Image": "docker.io/library/busybox:latest",
+        "ImageID": "af3f0f48a24edb84e94aff6f44f5d089203453719d3b2328486d311e61db9b09",
+        "IsInfra": false,
+        "Labels": {
+            "PODMAN_SYSTEMD_UNIT": "podman-compose@podview.service",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.project": "podview",
+            "com.docker.compose.project.config_files": "docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/home/user/Documents/git/podview",
+            "com.docker.compose.service": "backup",
+            "io.podman.compose.config-hash": "0e5384e04ae9f4c2801ba2bd40cc1e2d99984854cf93c54fa991266160972c0d",
+            "io.podman.compose.project": "podview",
+            "io.podman.compose.service": "backup",
+            "io.podman.compose.version": "1.5.0"
+        },
+        "Mounts": [
+            "/data"
+        ],
+        "Names": [
+            "backup"
+        ],
+        "Namespaces": {},
+        "Networks": [
+            "podview_default"
+        ],
+        "Pid": 203200,
+        "Pod": "008ff610183bbd8b76c002c2696bd684597988e52cd93b2cf68dcdd7a4326012",
+        "PodName": "pod_podview",
+        "Ports": null,
+        "Restarts": 0,
+        "Size": null,
+        "StartedAt": 1771305534,
+        "State": "running",
+        "Status": ""
+    }
+]

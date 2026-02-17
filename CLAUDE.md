@@ -36,7 +36,15 @@ The app connects to the Podman REST API (libpod) over a Unix socket using stdlib
 
 ## Testing
 
-No test suite. Smoke test manually:
+Run unit tests:
+
+```
+go test ./...
+```
+
+Test fixtures live in `testdata/` (raw Podman API JSON responses). Tests cover data transformation functions (`buildAppCategories`, `appState`, `formatPorts`, etc.) using real API data.
+
+Smoke test manually:
 
 ```
 LISTEN_ADDR=:18923 ./podview &
