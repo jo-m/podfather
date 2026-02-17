@@ -1,0 +1,157 @@
+# Demo compose file for podview.
+# Start with: podman-compose up -d
+# Then run podview and browse to http://localhost:8080
+
+services:
+  # ── Category: Media ──────────────────────────────────────────────
+
+  jellyfin:
+    image: docker.io/library/nginx:alpine
+    container_name: jellyfin
+    ports:
+      - "8096:80"
+    labels:
+      ch.jo-m.go.podview.app.name: "Jellyfin"
+      ch.jo-m.go.podview.app.icon: "🎬"
+      ch.jo-m.go.podview.app.category: "Media"
+      ch.jo-m.go.podview.app.sort-index: "1"
+      ch.jo-m.go.podview.app.subtitle: "Media Server"
+      ch.jo-m.go.podview.app.description: "Stream your media library"
+      ch.jo-m.go.podview.app.url: "http://localhost:8096"
+      io.containers.autoupdate: "registry"
+    volumes:
+      - jellyfin-config:/etc/nginx:ro
+    restart: unless-stopped
+
+  navidrome:
+    image: docker.io/library/httpd:alpine
+    container_name: navidrome
+    ports:
+      - "4533:80"
+    labels:
+      ch.jo-m.go.podview.app.name: "Navidrome"
+      ch.jo-m.go.podview.app.icon: "🎵"
+      ch.jo-m.go.podview.app.category: "Media"
+      ch.jo-m.go.podview.app.sort-index: "2"
+      ch.jo-m.go.podview.app.subtitle: "Music Server"
+      ch.jo-m.go.podview.app.description: "Personal music streaming"
+      ch.jo-m.go.podview.app.url: "http://localhost:4533"
+    restart: unless-stopped
+
+  # ── Category: Infrastructure ─────────────────────────────────────
+
+  # Multi-container app: Gitea with its database
+  gitea-web:
+    image: docker.io/library/nginx:alpine
+    container_name: gitea-web
+    ports:
+      - "3000:80"
+    labels:
+      ch.jo-m.go.podview.app.name: "Gitea"
+      ch.jo-m.go.podview.app.icon: "🍵"
+      ch.jo-m.go.podview.app.category: "Infrastructure"
+      ch.jo-m.go.podview.app.sort-index: "1"
+      ch.jo-m.go.podview.app.subtitle: "Git Hosting"
+      ch.jo-m.go.podview.app.description: "Self-hosted Git service"
+      ch.jo-m.go.podview.app.url: "http://localhost:3000"
+    restart: unless-stopped
+
+  gitea-db:
+    image: docker.io/library/alpine:latest
+    container_name: gitea-db
+    command: ["sleep", "infinity"]
+    labels:
+      ch.jo-m.go.podview.app.name: "Gitea"
+      ch.jo-m.go.podview.app.category: "Infrastructure"
+    restart: unless-stopped
+
+  traefik:
+    image: docker.io/library/nginx:alpine
+    container_name: traefik
+    ports:
+      - "8088:80"
+      - "8443:443"
+    labels:
+      ch.jo-m.go.podview.app.name: "Traefik"
+      ch.jo-m.go.podview.app.icon: "🔀"
+      ch.jo-m.go.podview.app.category: "Infrastructure"
+      ch.jo-m.go.podview.app.sort-index: "0"
+      ch.jo-m.go.podview.app.subtitle: "Reverse Proxy"
+      ch.jo-m.go.podview.app.description: "Edge router & load balancer"
+      ch.jo-m.go.podview.app.url: "http://localhost:8088"
+      io.containers.autoupdate: "registry"
+    restart: unless-stopped
+
+  # ── Category: Monitoring ─────────────────────────────────────────
+
+  grafana:
+    image: docker.io/library/httpd:alpine
+    container_name: grafana
+    ports:
+      - "3001:80"
+    labels:
+      ch.jo-m.go.podview.app.name: "Grafana"
+      ch.jo-m.go.podview.app.icon: "📊"
+      ch.jo-m.go.podview.app.category: "Monitoring"
+      ch.jo-m.go.podview.app.sort-index: "1"
+      ch.jo-m.go.podview.app.subtitle: "Dashboards"
+      ch.jo-m.go.podview.app.description: "Metrics visualization"
+      ch.jo-m.go.podview.app.url: "http://localhost:3001"
+    restart: unless-stopped
+
+  prometheus:
+    image: docker.io/library/alpine:latest
+    container_name: prometheus
+    command: ["sleep", "infinity"]
+    labels:
+      ch.jo-m.go.podview.app.name: "Prometheus"
+      ch.jo-m.go.podview.app.icon: "🔥"
+      ch.jo-m.go.podview.app.category: "Monitoring"
+      ch.jo-m.go.podview.app.sort-index: "2"
+      ch.jo-m.go.podview.app.subtitle: "Metrics"
+      ch.jo-m.go.podview.app.description: "Time series monitoring"
+    restart: unless-stopped
+
+  # ── Category: Uncategorized (no category label) ──────────────────
+
+  whoami:
+    image: docker.io/library/busybox:latest
+    container_name: whoami
+    command: ["httpd", "-f", "-p", "80"]
+    ports:
+      - "8089:80"
+    labels:
+      ch.jo-m.go.podview.app.name: "Whoami"
+      ch.jo-m.go.podview.app.icon: "👋"
+      ch.jo-m.go.podview.app.subtitle: "Debug endpoint"
+      ch.jo-m.go.podview.app.description: "Returns request info"
+      ch.jo-m.go.podview.app.url: "http://localhost:8089"
+    restart: unless-stopped
+
+  # ── Containers without app labels (visible in Containers tab) ────
+
+  redis:
+    image: docker.io/library/alpine:latest
+    container_name: redis
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
+
+  # Stopped container (exits immediately)
+  batch-job:
+    image: docker.io/library/alpine:latest
+    container_name: batch-job
+    command: ["echo", "done"]
+    restart: "no"
+
+  # Container with a volume mount
+  backup:
+    image: docker.io/library/busybox:latest
+    container_name: backup
+    command: ["sleep", "infinity"]
+    volumes:
+      - backup-data:/data
+    restart: unless-stopped
+
+volumes:
+  jellyfin-config:
+  backup-data:
