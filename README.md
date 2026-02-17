@@ -26,8 +26,7 @@ Multiple containers sharing the same `name` displayed on the same app card.
 | `ch.jo-m.go.podfather.app.icon` | no | Emoji icon | `☁️` |
 | `ch.jo-m.go.podfather.app.category` | no | Category heading (default: "Uncategorized") | `Productivity` |
 | `ch.jo-m.go.podfather.app.sort-index` | no | Sort order within category (default: 0) | `10` |
-| `ch.jo-m.go.podfather.app.subtitle` | no | Short subtitle | `Cloud storage` |
-| `ch.jo-m.go.podfather.app.description` | no | Longer description | `Self-hosted file sync and share` |
+| `ch.jo-m.go.podfather.app.description` | no | Short description | `Self-hosted file sync and share` |
 | `ch.jo-m.go.podfather.app.url` | no | URL opened when clicking the card | `https://cloud.example.com` |
 
 Example:
@@ -38,7 +37,7 @@ podman run -d \
   --label ch.jo-m.go.podfather.app.icon=☁️ \
   --label ch.jo-m.go.podfather.app.category=Productivity \
   --label ch.jo-m.go.podfather.app.sort-index=10 \
-  --label ch.jo-m.go.podfather.app.subtitle="Cloud storage" \
+  --label ch.jo-m.go.podfather.app.description="Self-hosted file sync and share" \
   --label ch.jo-m.go.podfather.app.url=https://cloud.example.com \
   nextcloud:latest
 ```
@@ -53,8 +52,7 @@ You can also add apps to the dashboard that are not running as Podman containers
 | `ICON` | no | Emoji icon | `📡` |
 | `CATEGORY` | no | Category heading (default: "Uncategorized") | `Infrastructure` |
 | `SORT_INDEX` | no | Sort order within category (default: 0) | `10` |
-| `SUBTITLE` | no | Short subtitle | `Network Router` |
-| `DESCRIPTION` | no | Longer description | `Router admin interface` |
+| `DESCRIPTION` | no | Short description | `Network router admin interface` |
 | `URL` | no | URL opened when clicking the card | `http://192.168.1.1` |
 
 Example:
@@ -64,7 +62,7 @@ export PODFATHER_APP_ROUTER_NAME=Router
 export PODFATHER_APP_ROUTER_ICON=📡
 export PODFATHER_APP_ROUTER_CATEGORY=Infrastructure
 export PODFATHER_APP_ROUTER_URL=http://192.168.1.1
-export PODFATHER_APP_ROUTER_SUBTITLE="Network Router"
+export PODFATHER_APP_ROUTER_DESCRIPTION="Network router admin interface"
 ```
 
 If an external app has the same name as a container-based app, the container-based app takes priority.

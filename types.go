@@ -206,7 +206,6 @@ type App struct {
 	Icon        string
 	Category    string
 	SortIndex   int
-	Subtitle    string
 	Description string
 	URL         string
 	Containers  []Container

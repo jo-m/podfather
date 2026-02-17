@@ -148,9 +148,6 @@ func TestBuildAppCategoriesMetadata(t *testing.T) {
 	if jellyfin.SortIndex != 1 {
 		t.Errorf("sort-index = %d, want 1", jellyfin.SortIndex)
 	}
-	if jellyfin.Subtitle != "Media Server" {
-		t.Errorf("subtitle = %q, want Media Server", jellyfin.Subtitle)
-	}
 	if jellyfin.Description != "Stream your media library" {
 		t.Errorf("description = %q", jellyfin.Description)
 	}
@@ -501,8 +498,7 @@ func TestParseExternalApps(t *testing.T) {
 		"PODFATHER_APP_ROUTER_ICON":        "📡",
 		"PODFATHER_APP_ROUTER_CATEGORY":    "Infrastructure",
 		"PODFATHER_APP_ROUTER_SORT_INDEX":  "5",
-		"PODFATHER_APP_ROUTER_SUBTITLE":    "Network Router",
-		"PODFATHER_APP_ROUTER_DESCRIPTION": "Router admin interface",
+		"PODFATHER_APP_ROUTER_DESCRIPTION": "Network router admin interface",
 		"PODFATHER_APP_NAS_NAME":           "NAS",
 		"PODFATHER_APP_NAS_URL":            "http://192.168.1.2",
 		// Key with underscores.
@@ -545,10 +541,7 @@ func TestParseExternalApps(t *testing.T) {
 	if router.SortIndex != 5 {
 		t.Errorf("Router SortIndex = %d, want 5", router.SortIndex)
 	}
-	if router.Subtitle != "Network Router" {
-		t.Errorf("Router Subtitle = %q", router.Subtitle)
-	}
-	if router.Description != "Router admin interface" {
+	if router.Description != "Network router admin interface" {
 		t.Errorf("Router Description = %q", router.Description)
 	}
 	if len(router.Containers) != 0 {
@@ -721,11 +714,11 @@ func TestEndToEndExternalApps(t *testing.T) {
 	enableAutoUpdate = false
 	externalApps = []App{
 		{
-			Name:     "Router",
-			Icon:     "📡",
-			Category: "Infrastructure",
-			URL:      "http://192.168.1.1",
-			Subtitle: "Network Router",
+			Name:        "Router",
+			Icon:        "📡",
+			Category:    "Infrastructure",
+			URL:         "http://192.168.1.1",
+			Description: "Network router dashboard",
 		},
 	}
 

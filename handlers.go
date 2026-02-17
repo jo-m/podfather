@@ -224,7 +224,7 @@ func appState(containers []Container) string {
 
 // parseExternalApps reads PODFATHER_APP_<KEY>_<FIELD> environment variables
 // and returns App structs for each unique key that has at least a NAME field.
-// Known suffixes: _NAME, _URL, _ICON, _CATEGORY, _SORT_INDEX, _SUBTITLE, _DESCRIPTION.
+// Known suffixes: _NAME, _URL, _ICON, _CATEGORY, _SORT_INDEX, _DESCRIPTION.
 // The <KEY> portion may contain underscores; suffixes are matched from the end.
 func parseExternalApps() []App {
 	const prefix = "PODFATHER_APP_"
@@ -235,7 +235,6 @@ func parseExternalApps() []App {
 		{"_DESCRIPTION", "description"},
 		{"_SORT_INDEX", "sort-index"},
 		{"_CATEGORY", "category"},
-		{"_SUBTITLE", "subtitle"},
 		{"_NAME", "name"},
 		{"_ICON", "icon"},
 		{"_URL", "url"},
@@ -287,7 +286,6 @@ func parseExternalApps() []App {
 			Icon:        f["icon"],
 			Category:    f["category"],
 			SortIndex:   sortIdx,
-			Subtitle:    f["subtitle"],
 			Description: f["description"],
 			URL:         f["url"],
 		})
@@ -317,7 +315,6 @@ func buildAppCategories(containers []Container) []AppCategory {
 				Icon:        c.Labels[appLabelPrefix+"icon"],
 				Category:    c.Labels[appLabelPrefix+"category"],
 				SortIndex:   sortIdx,
-				Subtitle:    c.Labels[appLabelPrefix+"subtitle"],
 				Description: c.Labels[appLabelPrefix+"description"],
 				URL:         c.Labels[appLabelPrefix+"url"],
 			}

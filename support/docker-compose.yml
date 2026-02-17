@@ -16,7 +16,7 @@ services:
       ch.jo-m.go.podfather.app.icon: "🫛"
       ch.jo-m.go.podfather.app.category: "Infrastructure"
       ch.jo-m.go.podfather.app.sort-index: "0"
-      ch.jo-m.go.podfather.app.subtitle: "Podman Dashboard"
+      ch.jo-m.go.podfather.app.description: "Podman container dashboard"
       ch.jo-m.go.podfather.app.url: "http://localhost:8080"
     environment:
       PODMAN_SOCKET: /var/run/podman.sock

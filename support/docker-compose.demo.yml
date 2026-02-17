@@ -17,15 +17,13 @@ services:
       PODFATHER_APP_ROUTER_ICON: "📡"
       PODFATHER_APP_ROUTER_CATEGORY: "Infrastructure"
       PODFATHER_APP_ROUTER_SORT_INDEX: "10"
-      PODFATHER_APP_ROUTER_SUBTITLE: "Network Router"
-      PODFATHER_APP_ROUTER_DESCRIPTION: "Router admin interface"
+      PODFATHER_APP_ROUTER_DESCRIPTION: "Network router admin interface"
       PODFATHER_APP_ROUTER_URL: "http://192.168.1.1"
       PODFATHER_APP_NAS_NAME: "NAS"
       PODFATHER_APP_NAS_ICON: "💾"
       PODFATHER_APP_NAS_CATEGORY: "Infrastructure"
       PODFATHER_APP_NAS_SORT_INDEX: "11"
-      PODFATHER_APP_NAS_SUBTITLE: "Network Storage"
-      PODFATHER_APP_NAS_DESCRIPTION: "Synology NAS"
+      PODFATHER_APP_NAS_DESCRIPTION: "Synology network storage"
       PODFATHER_APP_NAS_URL: "http://192.168.1.2"
 
   # ── Category: Media ──────────────────────────────────────────────
@@ -40,7 +38,6 @@ services:
       ch.jo-m.go.podfather.app.icon: "🎬"
       ch.jo-m.go.podfather.app.category: "Media"
       ch.jo-m.go.podfather.app.sort-index: "1"
-      ch.jo-m.go.podfather.app.subtitle: "Media Server"
       ch.jo-m.go.podfather.app.description: "Stream your media library"
       ch.jo-m.go.podfather.app.url: "http://localhost:8096"
       io.containers.autoupdate: "registry"
@@ -58,7 +55,6 @@ services:
       ch.jo-m.go.podfather.app.icon: "🎵"
       ch.jo-m.go.podfather.app.category: "Media"
       ch.jo-m.go.podfather.app.sort-index: "2"
-      ch.jo-m.go.podfather.app.subtitle: "Music Server"
       ch.jo-m.go.podfather.app.description: "Personal music streaming"
       ch.jo-m.go.podfather.app.url: "http://localhost:4533"
     restart: unless-stopped
@@ -76,7 +72,6 @@ services:
       ch.jo-m.go.podfather.app.icon: "🍵"
       ch.jo-m.go.podfather.app.category: "Infrastructure"
       ch.jo-m.go.podfather.app.sort-index: "1"
-      ch.jo-m.go.podfather.app.subtitle: "Git Hosting"
       ch.jo-m.go.podfather.app.description: "Self-hosted Git service"
       ch.jo-m.go.podfather.app.url: "http://localhost:3000"
     restart: unless-stopped
@@ -101,8 +96,7 @@ services:
       ch.jo-m.go.podfather.app.icon: "🔀"
       ch.jo-m.go.podfather.app.category: "Infrastructure"
       ch.jo-m.go.podfather.app.sort-index: "0"
-      ch.jo-m.go.podfather.app.subtitle: "Reverse Proxy"
-      ch.jo-m.go.podfather.app.description: "Edge router & load balancer"
+      ch.jo-m.go.podfather.app.description: "Reverse proxy & load balancer"
       ch.jo-m.go.podfather.app.url: "http://localhost:8088"
       io.containers.autoupdate: "registry"
     restart: unless-stopped
@@ -119,8 +113,7 @@ services:
       ch.jo-m.go.podfather.app.icon: "📊"
       ch.jo-m.go.podfather.app.category: "Monitoring"
       ch.jo-m.go.podfather.app.sort-index: "1"
-      ch.jo-m.go.podfather.app.subtitle: "Dashboards"
-      ch.jo-m.go.podfather.app.description: "Metrics visualization"
+      ch.jo-m.go.podfather.app.description: "Metrics dashboards & visualization"
       ch.jo-m.go.podfather.app.url: "http://localhost:3001"
     restart: unless-stopped
 
@@ -133,8 +126,7 @@ services:
       ch.jo-m.go.podfather.app.icon: "🔥"
       ch.jo-m.go.podfather.app.category: "Monitoring"
       ch.jo-m.go.podfather.app.sort-index: "2"
-      ch.jo-m.go.podfather.app.subtitle: "Metrics"
-      ch.jo-m.go.podfather.app.description: "Time series monitoring"
+      ch.jo-m.go.podfather.app.description: "Time series metrics & monitoring"
     restart: unless-stopped
 
   # ── Category: Uncategorized (no category label) ──────────────────
@@ -148,8 +140,7 @@ services:
     labels:
       ch.jo-m.go.podfather.app.name: "Whoami"
       ch.jo-m.go.podfather.app.icon: "👋"
-      ch.jo-m.go.podfather.app.subtitle: "Debug endpoint"
-      ch.jo-m.go.podfather.app.description: "Returns request info"
+      ch.jo-m.go.podfather.app.description: "Debug endpoint returning request info"
       ch.jo-m.go.podfather.app.url: "http://localhost:8089"
     restart: unless-stopped
 
