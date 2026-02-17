@@ -65,6 +65,7 @@ The server starts on `:8080` by default and connects to the rootless Podman sock
 |---|---|---|
 | `LISTEN_ADDR` | `:8080` | HTTP listen address |
 | `PODMAN_SOCKET` | `$XDG_RUNTIME_DIR/podman/podman.sock` | Path to the Podman API socket |
+| `BASE_PATH` | _(none)_ | URL path prefix for hosting at a subpath (e.g. `/podview`), no trailing slash |
 
 ### Running as a systemd user service
 
