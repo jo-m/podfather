@@ -25,6 +25,7 @@ func loadTestContainers(t *testing.T) []Container {
 }
 
 func TestLoadContainers(t *testing.T) {
+	t.Parallel()
 	list := loadTestContainers(t)
 	if len(list) != 11 {
 		t.Fatalf("expected 11 containers, got %d", len(list))
@@ -59,8 +60,10 @@ func TestLoadContainers(t *testing.T) {
 }
 
 func TestBuildAppCategories(t *testing.T) {
+	t.Parallel()
+	s := &Server{}
 	list := loadTestContainers(t)
-	categories := buildAppCategories(list)
+	categories := s.buildAppCategories(list)
 
 	// Expected categories in order: Infrastructure, Media, Monitoring, Uncategorized.
 	wantCats := []string{"Infrastructure", "Media", "Monitoring", "Uncategorized"}
@@ -125,8 +128,10 @@ func TestBuildAppCategories(t *testing.T) {
 }
 
 func TestBuildAppCategoriesMetadata(t *testing.T) {
+	t.Parallel()
+	s := &Server{}
 	list := loadTestContainers(t)
-	categories := buildAppCategories(list)
+	categories := s.buildAppCategories(list)
 
 	// Find Jellyfin and check all metadata fields are extracted.
 	var jellyfin *App
@@ -158,27 +163,33 @@ func TestBuildAppCategoriesMetadata(t *testing.T) {
 }
 
 func TestBuildAppCategoriesNoApps(t *testing.T) {
+	t.Parallel()
+	s := &Server{}
 	// Containers without app labels produce no categories.
 	containers := []Container{
 		{ID: "aaa", Names: []string{"redis"}, State: "running", Labels: map[string]string{}},
 		{ID: "bbb", Names: []string{"backup"}, State: "running"},
 	}
-	categories := buildAppCategories(containers)
+	categories := s.buildAppCategories(containers)
 	if len(categories) != 0 {
 		t.Errorf("got %d categories, want 0", len(categories))
 	}
 }
 
 func TestBuildAppCategoriesEmpty(t *testing.T) {
-	categories := buildAppCategories(nil)
+	t.Parallel()
+	s := &Server{}
+	categories := s.buildAppCategories(nil)
 	if len(categories) != 0 {
 		t.Errorf("got %d categories, want 0", len(categories))
 	}
 }
 
 func TestAppState(t *testing.T) {
+	t.Parallel()
+	s := &Server{}
 	list := loadTestContainers(t)
-	categories := buildAppCategories(list)
+	categories := s.buildAppCategories(list)
 
 	// All demo containers are running, so appState should return "running".
 	for _, cat := range categories {
@@ -216,6 +227,7 @@ func TestAppState(t *testing.T) {
 }
 
 func TestFormatPortsFromFixture(t *testing.T) {
+	t.Parallel()
 	list := loadTestContainers(t)
 
 	// Jellyfin: 0.0.0.0:8096->80/tcp.
@@ -260,6 +272,7 @@ func TestFormatPortsFromFixture(t *testing.T) {
 }
 
 func TestFormatExposedPortsFromFixture(t *testing.T) {
+	t.Parallel()
 	list := loadTestContainers(t)
 
 	// Jellyfin has ExposedPorts: {"80": ["tcp"]}.
@@ -289,6 +302,7 @@ func TestFormatExposedPortsFromFixture(t *testing.T) {
 }
 
 func TestShortIDFromFixture(t *testing.T) {
+	t.Parallel()
 	list := loadTestContainers(t)
 	for _, c := range list {
 		got := shortID(c.ID)
@@ -361,33 +375,24 @@ func newMockPodmanAPI(t *testing.T) *httptest.Server {
 	}))
 }
 
-func TestEndToEnd(t *testing.T) {
-	// Save and restore globals.
-	origClient := podman
-	origBaseURL := podmanBaseURL
-	origBasePath := basePath
-	origAutoUpdate := enableAutoUpdate
-	origExtApps := externalApps
-	t.Cleanup(func() {
-		podman = origClient
-		podmanBaseURL = origBaseURL
-		basePath = origBasePath
-		enableAutoUpdate = origAutoUpdate
-		externalApps = origExtApps
-	})
+// newTestServer creates a Server pointing at the given mock Podman API.
+func newTestServer(t *testing.T, mock *httptest.Server) *Server {
+	t.Helper()
+	return &Server{
+		podmanClient:  mock.Client(),
+		podmanBaseURL: mock.URL + "/v4.0.0/libpod",
+	}
+}
 
-	// Start mock Podman API.
+func TestEndToEnd(t *testing.T) {
+	t.Parallel()
 	mock := newMockPodmanAPI(t)
 	defer mock.Close()
 
-	podman = mock.Client()
-	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
-	basePath = ""
-	enableAutoUpdate = false
-	externalApps = nil
+	s := newTestServer(t, mock)
 
 	// Start app server.
-	app := httptest.NewServer(newMux("podman"))
+	app := httptest.NewServer(s.newMux("podman"))
 	defer app.Close()
 
 	// Client that does not follow redirects.
@@ -450,31 +455,15 @@ func TestEndToEnd(t *testing.T) {
 }
 
 func TestEndToEndAutoUpdate(t *testing.T) {
-	// Save and restore globals.
-	origClient := podman
-	origBaseURL := podmanBaseURL
-	origBasePath := basePath
-	origAutoUpdate := enableAutoUpdate
-	origExtApps := externalApps
-	t.Cleanup(func() {
-		podman = origClient
-		podmanBaseURL = origBaseURL
-		basePath = origBasePath
-		enableAutoUpdate = origAutoUpdate
-		externalApps = origExtApps
-	})
-
+	t.Parallel()
 	mock := newMockPodmanAPI(t)
 	defer mock.Close()
 
-	podman = mock.Client()
-	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
-	basePath = ""
-	enableAutoUpdate = true
-	externalApps = nil
+	s := newTestServer(t, mock)
+	s.enableAutoUpdate = true
 
 	// Pass "true" as podman binary — a no-op that exits 0.
-	app := httptest.NewServer(csrfProtect(newMux("true")))
+	app := httptest.NewServer(s.csrfProtect(s.newMux("true")))
 	defer app.Close()
 
 	// GET a page to obtain the CSRF cookie.
@@ -592,26 +581,26 @@ func TestParseExternalApps(t *testing.T) {
 }
 
 func TestBuildAppCategoriesWithExternalApps(t *testing.T) {
-	origExtApps := externalApps
-	t.Cleanup(func() { externalApps = origExtApps })
-
-	externalApps = []App{
-		{
-			Name:     "Router",
-			Icon:     "📡",
-			Category: "Infrastructure",
-			URL:      "http://192.168.1.1",
-		},
-		{
-			Name:     "Wiki",
-			Icon:     "📖",
-			Category: "Docs",
-			URL:      "http://wiki.example.com",
+	t.Parallel()
+	s := &Server{
+		externalApps: []App{
+			{
+				Name:     "Router",
+				Icon:     "📡",
+				Category: "Infrastructure",
+				URL:      "http://192.168.1.1",
+			},
+			{
+				Name:     "Wiki",
+				Icon:     "📖",
+				Category: "Docs",
+				URL:      "http://wiki.example.com",
+			},
 		},
 	}
 
 	list := loadTestContainers(t)
-	categories := buildAppCategories(list)
+	categories := s.buildAppCategories(list)
 
 	// Should now have: Docs, Infrastructure, Media, Monitoring, Uncategorized.
 	wantCats := []string{"Docs", "Infrastructure", "Media", "Monitoring", "Uncategorized"}
@@ -671,20 +660,20 @@ func TestBuildAppCategoriesWithExternalApps(t *testing.T) {
 }
 
 func TestExternalAppContainerPriority(t *testing.T) {
-	origExtApps := externalApps
-	t.Cleanup(func() { externalApps = origExtApps })
-
+	t.Parallel()
 	// External app with same name as a container app — container should take priority.
-	externalApps = []App{
-		{
-			Name:     "Jellyfin",
-			URL:      "http://external.example.com",
-			Category: "External",
+	s := &Server{
+		externalApps: []App{
+			{
+				Name:     "Jellyfin",
+				URL:      "http://external.example.com",
+				Category: "External",
+			},
 		},
 	}
 
 	list := loadTestContainers(t)
-	categories := buildAppCategories(list)
+	categories := s.buildAppCategories(list)
 
 	// Jellyfin should still be in Media (from container labels), not External.
 	var jellyfin *App
@@ -717,28 +706,12 @@ func TestExternalAppContainerPriority(t *testing.T) {
 }
 
 func TestEndToEndExternalApps(t *testing.T) {
-	// Save and restore globals.
-	origClient := podman
-	origBaseURL := podmanBaseURL
-	origBasePath := basePath
-	origAutoUpdate := enableAutoUpdate
-	origExtApps := externalApps
-	t.Cleanup(func() {
-		podman = origClient
-		podmanBaseURL = origBaseURL
-		basePath = origBasePath
-		enableAutoUpdate = origAutoUpdate
-		externalApps = origExtApps
-	})
-
+	t.Parallel()
 	mock := newMockPodmanAPI(t)
 	defer mock.Close()
 
-	podman = mock.Client()
-	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
-	basePath = ""
-	enableAutoUpdate = false
-	externalApps = []App{
+	s := newTestServer(t, mock)
+	s.externalApps = []App{
 		{
 			Name:        "Router",
 			Icon:        "📡",
@@ -748,7 +721,7 @@ func TestEndToEndExternalApps(t *testing.T) {
 		},
 	}
 
-	app := httptest.NewServer(newMux("podman"))
+	app := httptest.NewServer(s.newMux("podman"))
 	defer app.Close()
 
 	noRedirect := &http.Client{
@@ -794,29 +767,14 @@ func TestEndToEndExternalApps(t *testing.T) {
 }
 
 func TestCSRFProtection(t *testing.T) {
-	origClient := podman
-	origBaseURL := podmanBaseURL
-	origBasePath := basePath
-	origAutoUpdate := enableAutoUpdate
-	origExtApps := externalApps
-	t.Cleanup(func() {
-		podman = origClient
-		podmanBaseURL = origBaseURL
-		basePath = origBasePath
-		enableAutoUpdate = origAutoUpdate
-		externalApps = origExtApps
-	})
-
+	t.Parallel()
 	mock := newMockPodmanAPI(t)
 	defer mock.Close()
 
-	podman = mock.Client()
-	podmanBaseURL = mock.URL + "/v4.0.0/libpod"
-	basePath = ""
-	enableAutoUpdate = true
-	externalApps = nil
+	s := newTestServer(t, mock)
+	s.enableAutoUpdate = true
 
-	app := httptest.NewServer(csrfProtect(newMux("true")))
+	app := httptest.NewServer(s.csrfProtect(s.newMux("true")))
 	defer app.Close()
 
 	t.Run("GET sets CSRF cookie", func(t *testing.T) {

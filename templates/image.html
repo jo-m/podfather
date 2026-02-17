@@ -1,5 +1,5 @@
 {{define "content"}}
-<a href="{{basePath}}/images" class="back">&larr; Back to images</a>
+<a href="{{.BasePath}}/images" class="back">&larr; Back to images</a>
 <h1>{{if .Image.RepoTags}}{{index .Image.RepoTags 0}}{{else}}{{shortID .Image.ID}}{{end}}</h1>
 
 <div class="card">

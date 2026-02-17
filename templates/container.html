@@ -1,5 +1,5 @@
 {{define "content"}}
-<a href="{{basePath}}/containers" class="back">&larr; Back to containers</a>
+<a href="{{.BasePath}}/containers" class="back">&larr; Back to containers</a>
 <h1>{{.Container.Name}}</h1>
 
 <div class="card">
@@ -10,7 +10,7 @@
         <dt>Name</dt>
         <dd>{{.Container.Name}}</dd>
         <dt>Image</dt>
-        <dd class="mono"><a href="{{basePath}}/image/{{.Container.Image}}">{{.Container.ImageName}}</a></dd>
+        <dd class="mono"><a href="{{.BasePath}}/image/{{.Container.Image}}">{{.Container.ImageName}}</a></dd>
         <dt>Image ID</dt>
         <dd class="mono">{{shortID .Container.Image}}</dd>
         <dt>State</dt>

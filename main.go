@@ -26,48 +26,56 @@ func reqID(ctx context.Context) string {
 	return "-"
 }
 
-var basePath string
-var enableAutoUpdate bool
-var externalApps []App
+// Server holds all per-instance state for the podfather web server.
+type Server struct {
+	basePath         string
+	enableAutoUpdate bool
+	externalApps     []App
+	podmanClient     *http.Client
+	podmanBaseURL    string
+}
 
-func newMux(podmanBin string) *http.ServeMux {
+func (s *Server) newMux(podmanBin string) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", handleRoot)
-	mux.HandleFunc("GET /apps", handleApps)
-	mux.HandleFunc("GET /containers", handleContainers)
-	mux.HandleFunc("GET /container/{id}", handleContainer)
-	mux.HandleFunc("GET /images", handleImages)
-	mux.HandleFunc("GET /image/{id}", handleImage)
-	mux.HandleFunc("POST /auto-update", handleAutoUpdate(podmanBin))
+	mux.HandleFunc("GET /{$}", s.handleRoot)
+	mux.HandleFunc("GET /apps", s.handleApps)
+	mux.HandleFunc("GET /containers", s.handleContainers)
+	mux.HandleFunc("GET /container/{id}", s.handleContainer)
+	mux.HandleFunc("GET /images", s.handleImages)
+	mux.HandleFunc("GET /image/{id}", s.handleImage)
+	mux.HandleFunc("POST /auto-update", s.handleAutoUpdate(podmanBin))
 	return mux
 }
 
 func main() {
 	sock := socketPath()
-	initPodmanClient(sock)
 
 	addr := "127.0.0.1:8080"
 	if a := os.Getenv("LISTEN_ADDR"); a != "" {
 		addr = a
 	}
 
-	basePath = strings.TrimRight(os.Getenv("BASE_PATH"), "/")
-	enableAutoUpdate = os.Getenv("ENABLE_AUTOUPDATE_BUTTON") == "true"
-	externalApps = parseExternalApps()
+	s := &Server{
+		basePath:         strings.TrimRight(os.Getenv("BASE_PATH"), "/"),
+		enableAutoUpdate: os.Getenv("ENABLE_AUTOUPDATE_BUTTON") == "true",
+		externalApps:     parseExternalApps(),
+		podmanClient:     newPodmanClient(sock),
+		podmanBaseURL:    "http://d/v4.0.0/libpod",
+	}
 
-	mux := newMux("podman")
+	mux := s.newMux("podman")
 
 	var handler http.Handler = mux
-	if basePath != "" {
-		handler = http.StripPrefix(basePath, mux)
+	if s.basePath != "" {
+		handler = http.StripPrefix(s.basePath, mux)
 	}
 
 	host := addr
 	if strings.HasPrefix(host, ":") {
 		host = "localhost" + host
 	}
-	log.Printf("podfather listening on http://%s%s (socket: %s)", host, basePath, sock)
-	handler = csrfProtect(handler)
+	log.Printf("podfather listening on http://%s%s (socket: %s)", host, s.basePath, sock)
+	handler = s.csrfProtect(handler)
 	log.Fatal(http.ListenAndServe(addr, logRequests(handler)))
 }
 

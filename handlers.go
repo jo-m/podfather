@@ -34,8 +34,6 @@ var funcMap = template.FuncMap{
 	"mapKeys":            mapKeys,
 	"envName":            envName,
 	"envValue":           envValue,
-	"basePath":           func() string { return basePath },
-	"enableAutoUpdate":   func() bool { return enableAutoUpdate },
 	"appState":           appState,
 }
 
@@ -205,7 +203,7 @@ func generateCSRFToken() string {
 	return fmt.Sprintf("%x", b)
 }
 
-func csrfProtect(next http.Handler) http.Handler {
+func (s *Server) csrfProtect(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var token string
 		if c, err := r.Cookie(csrfCookieName); err == nil && len(c.Value) == 64 {
@@ -215,7 +213,7 @@ func csrfProtect(next http.Handler) http.Handler {
 			http.SetCookie(w, &http.Cookie{
 				Name:     csrfCookieName,
 				Value:    token,
-				Path:     basePath + "/",
+				Path:     s.basePath + "/",
 				HttpOnly: true,
 				SameSite: http.SameSiteStrictMode,
 			})
@@ -233,7 +231,7 @@ func csrfProtect(next http.Handler) http.Handler {
 	})
 }
 
-func render(w http.ResponseWriter, r *http.Request, page string, data any) {
+func (s *Server) render(w http.ResponseWriter, r *http.Request, page string, data any) {
 	t := pageTemplates[page]
 	if t == nil {
 		log.Printf("[%s] unknown template %s", reqID(r.Context()), page)
@@ -244,6 +242,8 @@ func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 		if token, ok := r.Context().Value(csrfTokenKey).(string); ok {
 			m["CSRFToken"] = token
 		}
+		m["BasePath"] = s.basePath
+		m["EnableAutoUpdate"] = s.enableAutoUpdate
 	}
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "base", data); err != nil {
@@ -338,7 +338,7 @@ func parseExternalApps() []App {
 	return apps
 }
 
-func buildAppCategories(containers []Container) []AppCategory {
+func (s *Server) buildAppCategories(containers []Container) []AppCategory {
 	appMap := make(map[string]*App)
 
 	for _, c := range containers {
@@ -369,9 +369,9 @@ func buildAppCategories(containers []Container) []AppCategory {
 	}
 
 	// Merge external apps (container-based apps take priority on name collision).
-	for i := range externalApps {
-		if _, exists := appMap[externalApps[i].Name]; !exists {
-			a := externalApps[i]
+	for i := range s.externalApps {
+		if _, exists := appMap[s.externalApps[i].Name]; !exists {
+			a := s.externalApps[i]
 			appMap[a.Name] = &a
 		}
 	}
@@ -413,43 +413,43 @@ func buildAppCategories(containers []Container) []AppCategory {
 	return categories
 }
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	if len(externalApps) > 0 {
-		http.Redirect(w, r, basePath+"/apps", http.StatusTemporaryRedirect)
+func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
+	if len(s.externalApps) > 0 {
+		http.Redirect(w, r, s.basePath+"/apps", http.StatusTemporaryRedirect)
 		return
 	}
 	var list []Container
-	if err := podmanGet("/containers/json?all=true", &list); err != nil {
+	if err := s.podmanGet("/containers/json?all=true", &list); err != nil {
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	for _, c := range list {
 		if c.Labels[appLabelPrefix+"name"] != "" {
-			http.Redirect(w, r, basePath+"/apps", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, s.basePath+"/apps", http.StatusTemporaryRedirect)
 			return
 		}
 	}
-	http.Redirect(w, r, basePath+"/containers", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, s.basePath+"/containers", http.StatusTemporaryRedirect)
 }
 
-func handleApps(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleApps(w http.ResponseWriter, r *http.Request) {
 	var list []Container
-	if err := podmanGet("/containers/json?all=true", &list); err != nil {
+	if err := s.podmanGet("/containers/json?all=true", &list); err != nil {
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	categories := buildAppCategories(list)
-	render(w, r, "apps.html", map[string]any{
+	categories := s.buildAppCategories(list)
+	s.render(w, r, "apps.html", map[string]any{
 		"Title":      "Apps",
 		"Categories": categories,
 	})
 }
 
-func handleContainers(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleContainers(w http.ResponseWriter, r *http.Request) {
 	var list []Container
-	if err := podmanGet("/containers/json?all=true", &list); err != nil {
+	if err := s.podmanGet("/containers/json?all=true", &list); err != nil {
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -457,20 +457,20 @@ func handleContainers(w http.ResponseWriter, r *http.Request) {
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].Created.After(list[j].Created)
 	})
-	render(w, r, "containers.html", map[string]any{
+	s.render(w, r, "containers.html", map[string]any{
 		"Title":      "Containers",
 		"Containers": list,
 	})
 }
 
-func handleContainer(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleContainer(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if !validID.MatchString(id) {
 		http.Error(w, "Invalid container ID", http.StatusBadRequest)
 		return
 	}
 	var c ContainerInspect
-	if err := podmanGet("/containers/"+id+"/json", &c); err != nil {
+	if err := s.podmanGet("/containers/"+id+"/json", &c); err != nil {
 		if errors.Is(err, errNotFound) {
 			http.Error(w, "Container Not Found", http.StatusNotFound)
 			return
@@ -483,15 +483,15 @@ func handleContainer(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		name = shortID(c.ID)
 	}
-	render(w, r, "container.html", map[string]any{
+	s.render(w, r, "container.html", map[string]any{
 		"Title":     "Container: " + name,
 		"Container": c,
 	})
 }
 
-func handleImages(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleImages(w http.ResponseWriter, r *http.Request) {
 	var list []ImageSummary
-	if err := podmanGet("/images/json", &list); err != nil {
+	if err := s.podmanGet("/images/json", &list); err != nil {
 		log.Printf("[%s] podman API error: %v", reqID(r.Context()), err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -506,20 +506,20 @@ func handleImages(w http.ResponseWriter, r *http.Request) {
 		}
 		return a < b
 	})
-	render(w, r, "images.html", map[string]any{
+	s.render(w, r, "images.html", map[string]any{
 		"Title":  "Images",
 		"Images": list,
 	})
 }
 
-func handleImage(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if !validID.MatchString(id) {
 		http.Error(w, "Invalid image ID", http.StatusBadRequest)
 		return
 	}
 	var img ImageInspect
-	if err := podmanGet("/images/"+id+"/json", &img); err != nil {
+	if err := s.podmanGet("/images/"+id+"/json", &img); err != nil {
 		if errors.Is(err, errNotFound) {
 			http.Error(w, "Image Not Found", http.StatusNotFound)
 			return
@@ -535,15 +535,15 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		name = shortID(img.ID)
 	}
-	render(w, r, "image.html", map[string]any{
+	s.render(w, r, "image.html", map[string]any{
 		"Title": "Image: " + name,
 		"Image": img,
 	})
 }
 
-func handleAutoUpdate(podmanBin string) http.HandlerFunc {
+func (s *Server) handleAutoUpdate(podmanBin string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !enableAutoUpdate {
+		if !s.enableAutoUpdate {
 			http.Error(w, "Not Found", http.StatusNotFound)
 			return
 		}
@@ -558,7 +558,7 @@ func handleAutoUpdate(podmanBin string) http.HandlerFunc {
 		if err != nil {
 			errMsg = err.Error()
 		}
-		render(w, r, "autoupdate.html", map[string]any{
+		s.render(w, r, "autoupdate.html", map[string]any{
 			"Title":  "Auto Update",
 			"Output": string(out),
 			"Error":  errMsg,

@@ -15,7 +15,7 @@
         {{if .URL}}</a>{{else}}</div>{{end}}
         <div class="app-states">
             {{range .Containers}}
-            <a class="badge badge-{{.State}}" href="{{basePath}}/container/{{.ID}}" title="{{firstName .Names}}">{{.State}}</a>
+            <a class="badge badge-{{.State}}" href="{{$.BasePath}}/container/{{.ID}}" title="{{firstName .Names}}">{{.State}}</a>
             {{end}}
         </div>
     </div>

@@ -15,9 +15,6 @@ import (
 // errNotFound is returned when the Podman API responds with 404.
 var errNotFound = errors.New("not found")
 
-var podman *http.Client
-var podmanBaseURL = "http://d/v4.0.0/libpod"
-
 func socketPath() string {
 	if s := os.Getenv("PODMAN_SOCKET"); s != "" {
 		return s
@@ -29,8 +26,8 @@ func socketPath() string {
 	return xdg + "/podman/podman.sock"
 }
 
-func initPodmanClient(sock string) {
-	podman = &http.Client{
+func newPodmanClient(sock string) *http.Client {
+	return &http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 				var d net.Dialer
@@ -41,8 +38,8 @@ func initPodmanClient(sock string) {
 	}
 }
 
-func podmanGet(path string, result any) error {
-	resp, err := podman.Get(podmanBaseURL + path)
+func (s *Server) podmanGet(path string, result any) error {
+	resp, err := s.podmanClient.Get(s.podmanBaseURL + path)
 	if err != nil {
 		return fmt.Errorf("podman API: %w", err)
 	}

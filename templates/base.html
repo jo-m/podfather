@@ -105,12 +105,12 @@
 </head>
 <body>
     <nav>
-        <a href="{{basePath}}/" class="brand" style="text-decoration:none;color:#e2e8f0;">🫛 podfather</a>
-        <a href="{{basePath}}/apps">Apps</a>
-        <a href="{{basePath}}/containers">Containers</a>
-        <a href="{{basePath}}/images">Images</a>
+        <a href="{{.BasePath}}/" class="brand" style="text-decoration:none;color:#e2e8f0;">🫛 podfather</a>
+        <a href="{{.BasePath}}/apps">Apps</a>
+        <a href="{{.BasePath}}/containers">Containers</a>
+        <a href="{{.BasePath}}/images">Images</a>
         <span class="spacer"></span>
-        {{if enableAutoUpdate}}<form method="POST" action="{{basePath}}/auto-update" style="margin:0">
+        {{if .EnableAutoUpdate}}<form method="POST" action="{{.BasePath}}/auto-update" style="margin:0">
             <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
             <button type="submit" class="btn btn-warn">Trigger Auto Update</button>
         </form>{{end}}

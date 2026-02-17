@@ -15,9 +15,9 @@
     <tbody>
         {{range .Containers}}
         <tr>
-            <td><a href="{{basePath}}/container/{{.ID}}">{{firstName .Names}}</a></td>
-            <td class="mono"><a href="{{basePath}}/container/{{.ID}}">{{shortID .ID}}</a></td>
-            <td class="mono"><a href="{{basePath}}/image/{{.ImageID}}">{{.Image}}</a></td>
+            <td><a href="{{$.BasePath}}/container/{{.ID}}">{{firstName .Names}}</a></td>
+            <td class="mono"><a href="{{$.BasePath}}/container/{{.ID}}">{{shortID .ID}}</a></td>
+            <td class="mono"><a href="{{$.BasePath}}/image/{{.ImageID}}">{{.Image}}</a></td>
             <td>{{formatTime .Created}}</td>
             <td><span class="badge badge-{{.State}}">{{.State}}</span></td>
             <td class="mono">{{if .Ports}}{{formatPorts .Ports}}{{else}}{{formatExposedPorts .ExposedPorts}}{{end}}</td>
