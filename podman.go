@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -11,7 +13,7 @@ import (
 )
 
 // errNotFound is returned when the Podman API responds with 404.
-var errNotFound = fmt.Errorf("not found")
+var errNotFound = errors.New("not found")
 
 var podman *http.Client
 
@@ -44,9 +46,11 @@ func podmanGet(path string, result any) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
+		io.Copy(io.Discard, resp.Body)
 		return errNotFound
 	}
 	if resp.StatusCode != http.StatusOK {
+		io.Copy(io.Discard, resp.Body)
 		return fmt.Errorf("podman API %s: %s", path, resp.Status)
 	}
 	return json.NewDecoder(resp.Body).Decode(result)
