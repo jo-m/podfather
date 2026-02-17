@@ -6,16 +6,16 @@ podview is a simple web dashboard for rootless Podman. Single Go binary, no Java
 
 ## Build and run
 
-```
+```bash
 go build -o podview .
 ./podview
 ```
 
-Requires the Podman API socket to be running (`systemctl --user start podman.socket` or `podman system service --time=0 &`).
+Requires the Podman API socket to be running (`systemctl --user start podman.socket` or `podman system service`).
 
 ## Architecture
 
-The app connects to the Podman REST API (libpod) over a Unix socket using stdlib `net/http` — no podman Go module dependency.
+The app connects to the Podman REST API over a Unix socket using Go stdlib `net/http`.
 
 - `main.go` — Entry point: server setup and routing.
 - `types.go` — Podman API response structs and app-layer types (`App`, `AppCategory`). `ContainerConfig.Env` is intentionally omitted so env vars are never parsed.
@@ -27,35 +27,16 @@ The app connects to the Podman REST API (libpod) over a Unix socket using stdlib
 
 - **No JavaScript.** All rendering is server-side via Go templates.
 - **No external dependencies.** Only Go stdlib. Do not add third-party modules.
-- **No secrets in UI.** The `Env` field is structurally omitted from `ContainerConfig`. Do not add it or any other field that could expose secrets.
+- **No secrets in UI.** The `Env` field is omitted from `ContainerConfig`. Do not add it or any other field that could expose secrets.
 - **Podman API version** is `v4.0.0` in the URL path (compatible with Podman v4+).
-- **Apps view** is the start page (`GET /`). Containers with `ch.jo-m.go.podview.app.*` labels are grouped into app cards by name, organized by category. The label prefix constant is `appLabelPrefix` in `types.go`.
+- **Apps view** at (`GET /apps`). Containers with `ch.jo-m.go.podview.app.*` (`const appLabelPrefix` in `types.go`) labels are grouped into app cards by name, organized by category.
 - **Auto-update** is done via `exec.Command("podman", "auto-update")`, not the REST API.
 - **CSS** is inline in `templates/base.html`. No CSS framework. Keep it minimal.
-- **Formatting.** Always run `gofmt -w` on all edited `.go` files after making changes.
+- **Error handling.** Log errors server-side with `log.Printf` and return minimal error messages (e.g. "Internal Server Error") to the client without exposing details.
+- **Formatting.** Always run `gofmt -w` on all edited `.go` files after making changes
+- **Tests.** Run with `go test ./...` after making changes.
+- **Config and usage changes:** When changing ENV vars, CLI flags, etc. always update accordingly 1. README.md 2. systemd unit file 3. this CLAUDE.md.
 
 ## Testing
 
-Run unit tests:
-
-```
-go test ./...
-```
-
 Test fixtures live in `testdata/` (raw Podman API JSON responses). Tests cover data transformation functions (`buildAppCategories`, `appState`, `formatPorts`, etc.) using real API data.
-
-Smoke test manually:
-
-```
-LISTEN_ADDR=:18923 ./podview &
-curl -s http://localhost:18923/            # Apps (start page)
-curl -s http://localhost:18923/containers  # Container list
-curl -s http://localhost:18923/images
-curl -s http://localhost:18923/container/<ID>
-```
-
-## Environment variables
-
-- `LISTEN_ADDR` — listen address (default `:8080`)
-- `PODMAN_SOCKET` — override socket path (default `$XDG_RUNTIME_DIR/podman/podman.sock`)
-- `BASE_PATH` — URL path prefix for hosting at a subpath (e.g. `/podview`), no trailing slash
