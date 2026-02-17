@@ -52,8 +52,8 @@ func TestLoadContainers(t *testing.T) {
 	if jellyfin.Ports[0].HostPort != 8096 || jellyfin.Ports[0].ContainerPort != 80 {
 		t.Errorf("jellyfin port = %d->%d, want 8096->80", jellyfin.Ports[0].HostPort, jellyfin.Ports[0].ContainerPort)
 	}
-	if jellyfin.Labels["ch.jo-m.go.podview.app.name"] != "Jellyfin" {
-		t.Errorf("jellyfin app name label = %q", jellyfin.Labels["ch.jo-m.go.podview.app.name"])
+	if jellyfin.Labels["ch.jo-m.go.podfather.app.name"] != "Jellyfin" {
+		t.Errorf("jellyfin app name label = %q", jellyfin.Labels["ch.jo-m.go.podfather.app.name"])
 	}
 }
 

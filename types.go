@@ -197,7 +197,7 @@ type ImageHistory struct {
 }
 
 // App label prefix for container metadata.
-const appLabelPrefix = "ch.jo-m.go.podview.app."
+const appLabelPrefix = "ch.jo-m.go.podfather.app."
 
 // App represents a logical application composed of one or more containers
 // sharing the same app name label.

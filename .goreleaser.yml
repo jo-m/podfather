@@ -19,16 +19,16 @@ archives:
 
 dockers:
   - image_templates:
-      - "ghcr.io/jo-m/podview:{{ .Version }}-amd64"
-      - "ghcr.io/jo-m/podview:latest-amd64"
+      - "ghcr.io/jo-m/podfather:{{ .Version }}-amd64"
+      - "ghcr.io/jo-m/podfather:latest-amd64"
     use: buildx
     build_flag_templates:
       - "--platform=linux/amd64"
     goarch: amd64
     dockerfile: Dockerfile
   - image_templates:
-      - "ghcr.io/jo-m/podview:{{ .Version }}-arm64"
-      - "ghcr.io/jo-m/podview:latest-arm64"
+      - "ghcr.io/jo-m/podfather:{{ .Version }}-arm64"
+      - "ghcr.io/jo-m/podfather:latest-arm64"
     use: buildx
     build_flag_templates:
       - "--platform=linux/arm64"
@@ -36,14 +36,14 @@ dockers:
     dockerfile: Dockerfile
 
 docker_manifests:
-  - name_template: "ghcr.io/jo-m/podview:{{ .Version }}"
+  - name_template: "ghcr.io/jo-m/podfather:{{ .Version }}"
     image_templates:
-      - "ghcr.io/jo-m/podview:{{ .Version }}-amd64"
-      - "ghcr.io/jo-m/podview:{{ .Version }}-arm64"
-  - name_template: "ghcr.io/jo-m/podview:latest"
+      - "ghcr.io/jo-m/podfather:{{ .Version }}-amd64"
+      - "ghcr.io/jo-m/podfather:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/jo-m/podfather:latest"
     image_templates:
-      - "ghcr.io/jo-m/podview:latest-amd64"
-      - "ghcr.io/jo-m/podview:latest-arm64"
+      - "ghcr.io/jo-m/podfather:latest-amd64"
+      - "ghcr.io/jo-m/podfather:latest-arm64"
 
 changelog:
   sort: asc

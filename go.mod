@@ -1,3 +1,3 @@
-module jo-m.ch/go/podview
+module jo-m.ch/go/podfather
 
 go 1.23

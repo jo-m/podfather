@@ -1,6 +1,6 @@
-# Demo compose file for podview.
+# Demo compose file for podfather.
 # Start with: podman-compose up -d
-# Then run podview and browse to http://localhost:8080
+# Then run podfather and browse to http://localhost:8080
 
 services:
   # ── Category: Media ──────────────────────────────────────────────
@@ -11,13 +11,13 @@ services:
     ports:
       - "8096:80"
     labels:
-      ch.jo-m.go.podview.app.name: "Jellyfin"
-      ch.jo-m.go.podview.app.icon: "🎬"
-      ch.jo-m.go.podview.app.category: "Media"
-      ch.jo-m.go.podview.app.sort-index: "1"
-      ch.jo-m.go.podview.app.subtitle: "Media Server"
-      ch.jo-m.go.podview.app.description: "Stream your media library"
-      ch.jo-m.go.podview.app.url: "http://localhost:8096"
+      ch.jo-m.go.podfather.app.name: "Jellyfin"
+      ch.jo-m.go.podfather.app.icon: "🎬"
+      ch.jo-m.go.podfather.app.category: "Media"
+      ch.jo-m.go.podfather.app.sort-index: "1"
+      ch.jo-m.go.podfather.app.subtitle: "Media Server"
+      ch.jo-m.go.podfather.app.description: "Stream your media library"
+      ch.jo-m.go.podfather.app.url: "http://localhost:8096"
       io.containers.autoupdate: "registry"
     volumes:
       - jellyfin-config:/etc/nginx:ro
@@ -29,13 +29,13 @@ services:
     ports:
       - "4533:80"
     labels:
-      ch.jo-m.go.podview.app.name: "Navidrome"
-      ch.jo-m.go.podview.app.icon: "🎵"
-      ch.jo-m.go.podview.app.category: "Media"
-      ch.jo-m.go.podview.app.sort-index: "2"
-      ch.jo-m.go.podview.app.subtitle: "Music Server"
-      ch.jo-m.go.podview.app.description: "Personal music streaming"
-      ch.jo-m.go.podview.app.url: "http://localhost:4533"
+      ch.jo-m.go.podfather.app.name: "Navidrome"
+      ch.jo-m.go.podfather.app.icon: "🎵"
+      ch.jo-m.go.podfather.app.category: "Media"
+      ch.jo-m.go.podfather.app.sort-index: "2"
+      ch.jo-m.go.podfather.app.subtitle: "Music Server"
+      ch.jo-m.go.podfather.app.description: "Personal music streaming"
+      ch.jo-m.go.podfather.app.url: "http://localhost:4533"
     restart: unless-stopped
 
   # ── Category: Infrastructure ─────────────────────────────────────
@@ -47,13 +47,13 @@ services:
     ports:
       - "3000:80"
     labels:
-      ch.jo-m.go.podview.app.name: "Gitea"
-      ch.jo-m.go.podview.app.icon: "🍵"
-      ch.jo-m.go.podview.app.category: "Infrastructure"
-      ch.jo-m.go.podview.app.sort-index: "1"
-      ch.jo-m.go.podview.app.subtitle: "Git Hosting"
-      ch.jo-m.go.podview.app.description: "Self-hosted Git service"
-      ch.jo-m.go.podview.app.url: "http://localhost:3000"
+      ch.jo-m.go.podfather.app.name: "Gitea"
+      ch.jo-m.go.podfather.app.icon: "🍵"
+      ch.jo-m.go.podfather.app.category: "Infrastructure"
+      ch.jo-m.go.podfather.app.sort-index: "1"
+      ch.jo-m.go.podfather.app.subtitle: "Git Hosting"
+      ch.jo-m.go.podfather.app.description: "Self-hosted Git service"
+      ch.jo-m.go.podfather.app.url: "http://localhost:3000"
     restart: unless-stopped
 
   gitea-db:
@@ -61,8 +61,8 @@ services:
     container_name: gitea-db
     command: ["sleep", "infinity"]
     labels:
-      ch.jo-m.go.podview.app.name: "Gitea"
-      ch.jo-m.go.podview.app.category: "Infrastructure"
+      ch.jo-m.go.podfather.app.name: "Gitea"
+      ch.jo-m.go.podfather.app.category: "Infrastructure"
     restart: unless-stopped
 
   traefik:
@@ -72,13 +72,13 @@ services:
       - "8088:80"
       - "8443:443"
     labels:
-      ch.jo-m.go.podview.app.name: "Traefik"
-      ch.jo-m.go.podview.app.icon: "🔀"
-      ch.jo-m.go.podview.app.category: "Infrastructure"
-      ch.jo-m.go.podview.app.sort-index: "0"
-      ch.jo-m.go.podview.app.subtitle: "Reverse Proxy"
-      ch.jo-m.go.podview.app.description: "Edge router & load balancer"
-      ch.jo-m.go.podview.app.url: "http://localhost:8088"
+      ch.jo-m.go.podfather.app.name: "Traefik"
+      ch.jo-m.go.podfather.app.icon: "🔀"
+      ch.jo-m.go.podfather.app.category: "Infrastructure"
+      ch.jo-m.go.podfather.app.sort-index: "0"
+      ch.jo-m.go.podfather.app.subtitle: "Reverse Proxy"
+      ch.jo-m.go.podfather.app.description: "Edge router & load balancer"
+      ch.jo-m.go.podfather.app.url: "http://localhost:8088"
       io.containers.autoupdate: "registry"
     restart: unless-stopped
 
@@ -90,13 +90,13 @@ services:
     ports:
       - "3001:80"
     labels:
-      ch.jo-m.go.podview.app.name: "Grafana"
-      ch.jo-m.go.podview.app.icon: "📊"
-      ch.jo-m.go.podview.app.category: "Monitoring"
-      ch.jo-m.go.podview.app.sort-index: "1"
-      ch.jo-m.go.podview.app.subtitle: "Dashboards"
-      ch.jo-m.go.podview.app.description: "Metrics visualization"
-      ch.jo-m.go.podview.app.url: "http://localhost:3001"
+      ch.jo-m.go.podfather.app.name: "Grafana"
+      ch.jo-m.go.podfather.app.icon: "📊"
+      ch.jo-m.go.podfather.app.category: "Monitoring"
+      ch.jo-m.go.podfather.app.sort-index: "1"
+      ch.jo-m.go.podfather.app.subtitle: "Dashboards"
+      ch.jo-m.go.podfather.app.description: "Metrics visualization"
+      ch.jo-m.go.podfather.app.url: "http://localhost:3001"
     restart: unless-stopped
 
   prometheus:
@@ -104,12 +104,12 @@ services:
     container_name: prometheus
     command: ["sleep", "infinity"]
     labels:
-      ch.jo-m.go.podview.app.name: "Prometheus"
-      ch.jo-m.go.podview.app.icon: "🔥"
-      ch.jo-m.go.podview.app.category: "Monitoring"
-      ch.jo-m.go.podview.app.sort-index: "2"
-      ch.jo-m.go.podview.app.subtitle: "Metrics"
-      ch.jo-m.go.podview.app.description: "Time series monitoring"
+      ch.jo-m.go.podfather.app.name: "Prometheus"
+      ch.jo-m.go.podfather.app.icon: "🔥"
+      ch.jo-m.go.podfather.app.category: "Monitoring"
+      ch.jo-m.go.podfather.app.sort-index: "2"
+      ch.jo-m.go.podfather.app.subtitle: "Metrics"
+      ch.jo-m.go.podfather.app.description: "Time series monitoring"
     restart: unless-stopped
 
   # ── Category: Uncategorized (no category label) ──────────────────
@@ -121,11 +121,11 @@ services:
     ports:
       - "8089:80"
     labels:
-      ch.jo-m.go.podview.app.name: "Whoami"
-      ch.jo-m.go.podview.app.icon: "👋"
-      ch.jo-m.go.podview.app.subtitle: "Debug endpoint"
-      ch.jo-m.go.podview.app.description: "Returns request info"
-      ch.jo-m.go.podview.app.url: "http://localhost:8089"
+      ch.jo-m.go.podfather.app.name: "Whoami"
+      ch.jo-m.go.podfather.app.icon: "👋"
+      ch.jo-m.go.podfather.app.subtitle: "Debug endpoint"
+      ch.jo-m.go.podfather.app.description: "Returns request info"
+      ch.jo-m.go.podfather.app.url: "http://localhost:8089"
     restart: unless-stopped
 
   # ── Containers without app labels (visible in Containers tab) ────

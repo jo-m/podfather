@@ -1,4 +1,4 @@
-# podview
+# podfather
 
 A simple web dashboard for Podman.
 Single binary, no JavaScript, no external dependencies.
@@ -17,29 +17,29 @@ Ideal as landing page on your self-hosted server.
 
 ## App labels
 
-Containers with labels prefixed `ch.jo-m.go.podview.app.` appear as apps on the start page.
+Containers with labels prefixed `ch.jo-m.go.podfather.app.` appear as apps on the start page.
 Multiple containers sharing the same `name` displayed on the same app card.
 
 | Label | Required | Description | Example |
 |---|---|---|---|
-| `ch.jo-m.go.podview.app.name` | **yes** | App name (used for grouping) | `Nextcloud` |
-| `ch.jo-m.go.podview.app.icon` | no | Emoji icon | `☁️` |
-| `ch.jo-m.go.podview.app.category` | no | Category heading (default: "Uncategorized") | `Productivity` |
-| `ch.jo-m.go.podview.app.sort-index` | no | Sort order within category (default: 0) | `10` |
-| `ch.jo-m.go.podview.app.subtitle` | no | Short subtitle | `Cloud storage` |
-| `ch.jo-m.go.podview.app.description` | no | Longer description | `Self-hosted file sync and share` |
-| `ch.jo-m.go.podview.app.url` | no | URL opened when clicking the card | `https://cloud.example.com` |
+| `ch.jo-m.go.podfather.app.name` | **yes** | App name (used for grouping) | `Nextcloud` |
+| `ch.jo-m.go.podfather.app.icon` | no | Emoji icon | `☁️` |
+| `ch.jo-m.go.podfather.app.category` | no | Category heading (default: "Uncategorized") | `Productivity` |
+| `ch.jo-m.go.podfather.app.sort-index` | no | Sort order within category (default: 0) | `10` |
+| `ch.jo-m.go.podfather.app.subtitle` | no | Short subtitle | `Cloud storage` |
+| `ch.jo-m.go.podfather.app.description` | no | Longer description | `Self-hosted file sync and share` |
+| `ch.jo-m.go.podfather.app.url` | no | URL opened when clicking the card | `https://cloud.example.com` |
 
 Example:
 
 ```
 podman run -d \
-  --label ch.jo-m.go.podview.app.name=Nextcloud \
-  --label ch.jo-m.go.podview.app.icon=☁️ \
-  --label ch.jo-m.go.podview.app.category=Productivity \
-  --label ch.jo-m.go.podview.app.sort-index=10 \
-  --label ch.jo-m.go.podview.app.subtitle="Cloud storage" \
-  --label ch.jo-m.go.podview.app.url=https://cloud.example.com \
+  --label ch.jo-m.go.podfather.app.name=Nextcloud \
+  --label ch.jo-m.go.podfather.app.icon=☁️ \
+  --label ch.jo-m.go.podfather.app.category=Productivity \
+  --label ch.jo-m.go.podfather.app.sort-index=10 \
+  --label ch.jo-m.go.podfather.app.subtitle="Cloud storage" \
+  --label ch.jo-m.go.podfather.app.url=https://cloud.example.com \
   nextcloud:latest
 ```
 
@@ -50,8 +50,9 @@ podman run -d \
 systemctl --user enable --now podman.socket
 
 # Build and run
-go build -o podview .
-./podview
+export ENABLE_AUTOUPDATE_BUTTON=true
+go build -o podfather .
+./podfather
 ```
 
 The server starts on `127.0.0.1:8080` (localhost only) by default and connects to the rootless Podman socket.
@@ -62,16 +63,16 @@ The server starts on `127.0.0.1:8080` (localhost only) by default and connects t
 |---|---|---|
 | `LISTEN_ADDR` | `127.0.0.1:8080` | HTTP listen address |
 | `PODMAN_SOCKET` | `$XDG_RUNTIME_DIR/podman/podman.sock` | Path to the Podman API socket |
-| `BASE_PATH` | _(none)_ | URL path prefix for hosting at a subpath (e.g. `/podview`), no trailing slash |
+| `BASE_PATH` | _(none)_ | URL path prefix for hosting at a subpath (e.g. `/podfather`), no trailing slash |
 | `ENABLE_AUTOUPDATE_BUTTON` | _(none)_ | Set to `true` to allow triggering `podman auto-update` from the web UI |
 
 ### Running as a systemd user service
 
-A sample unit file is provided in [`podview.service`](podview.service). Install it with:
+A sample unit file is provided in [`podfather.service`](podfather.service). Install it with:
 
 ```bash
-cp podview.service ~/.config/systemd/user/
-systemctl --user enable --now podview
+cp podfather.service ~/.config/systemd/user/
+systemctl --user enable --now podfather
 ```
 
 ### Running with Docker
@@ -84,12 +85,12 @@ docker run -it --rm \
   --env LISTEN_ADDR=:8080 \
   --env BASE_PATH= \
   --user $(id -u):$(id -g) \
-  ghcr.io/jo-m/podview:latest-amd64
+  ghcr.io/jo-m/podfather:latest-amd64
 ```
 
 ## Creating releases
 
-1. Go to the [GitHub Releases page](https://github.com/jo-m/podview/releases) and click **Draft a new release**.
+1. Go to the [GitHub Releases page](https://github.com/jo-m/podfather/releases) and click **Draft a new release**.
 2. Create a new tag (e.g. `v1.2.0`).
 3. Fill in the release title and description, then click **Publish release**.
 4. The [Release workflow](.github/workflows/release.yml) will automatically build binaries, Docker images, and attach them to the release.

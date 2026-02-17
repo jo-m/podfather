@@ -1,4 +1,4 @@
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY podview /podview
+COPY podfather /podfather
 EXPOSE 8080
-ENTRYPOINT ["/podview"]
+ENTRYPOINT ["/podfather"]

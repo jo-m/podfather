@@ -1,4 +1,4 @@
-// Package main implements podview, a simple web dashboard for rootless Podman.
+// Package main implements podfather, a simple web dashboard for rootless Podman.
 // It connects to the Podman API socket and renders container/image information
 // server-side using Go templates. No JavaScript, no external dependencies.
 package main
@@ -63,7 +63,7 @@ func main() {
 	if strings.HasPrefix(host, ":") {
 		host = "localhost" + host
 	}
-	log.Printf("podview listening on http://%s%s (socket: %s)", host, basePath, sock)
+	log.Printf("podfather listening on http://%s%s (socket: %s)", host, basePath, sock)
 	log.Fatal(http.ListenAndServe(addr, logRequests(handler)))
 }
 
