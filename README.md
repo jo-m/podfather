@@ -116,7 +116,7 @@ podman-compose -f docker-compose.demo.yml up -d
 
 All external dependencies (GitHub Actions, Docker base images, tool versions) are pinned to exact versions or SHA digests for reproducible builds and supply-chain security.
 
-[Renovate](https://docs.renovatebot.com/) is configured via `renovate.json` to automatically open PRs when pinned dependencies have updates available. To enable it, install the [Mend Renovate GitHub App](https://github.com/apps/renovate) on this repository.
+[Renovate](https://docs.renovatebot.com/) runs as a self-hosted scheduled CI workflow (`.github/workflows/renovate.yml`) and automatically opens PRs when pinned dependencies have updates available. No external GitHub App required.
 
 CI also runs [`govulncheck`](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck) to check for known Go vulnerabilities.
 

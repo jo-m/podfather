@@ -49,7 +49,7 @@ All external dependencies are pinned to exact versions/digests for reproducibili
 - **Docker images** in `Dockerfile` and `support/docker-compose.demo.yml` are pinned to `tag@sha256:digest`. The project's own image (`ghcr.io/jo-m/podfather:latest`) in `support/docker-compose.yml` is intentionally left unpinned.
 - **GoReleaser** version in `release.yml` is pinned to an exact version (not `~> v2`).
 - **govulncheck** runs in CI (`ci.yml`) to detect Go vulnerabilities. It is installed as a CI tool, not added to `go.mod`.
-- **Renovate** (`renovate.json`) is configured to create weekly update PRs for all pinned dependencies. Requires the [Mend Renovate GitHub App](https://github.com/apps/renovate) to be installed on the repo.
+- **Renovate** runs self-hosted via `.github/workflows/renovate.yml` (scheduled weekly, Saturday 4am UTC). Config is in `renovate.json`. No external GitHub App required.
 
 When adding new GitHub Actions, Docker images, or tool versions, always pin them to an exact SHA/digest. Renovate will handle keeping them up to date.
 
