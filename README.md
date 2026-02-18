@@ -6,14 +6,11 @@ Ideal as landing page on your self-hosted server.
 
 ## Features
 
-- Apps dashboard - start page showing containers as application cards, grouped by category
-- List all containers with state, image, ports, and creation time
-- Inspect container details (command, mounts, ports, labels, restart policy, health)
-- Read-only except for `podman auto-update` (off by default).
-- List images with tags and sizes
-- Trigger `podman auto-update`
+- Apps dashboard - start page showing containers as application cards, grouped by category. Can be configured via container labels.
+- List and inspect containers and images.
+- Read-only except for allowing to trigger `podman auto-update` (off by default).
 - Environment variables and secrets are never displayed
-- **No auth, handle this by running behind a reverse proxy if you host it publicly.**
+- **No auth, needs to run behind a reverse proxy if you host it publicly.**
 
 ## App labels
 
