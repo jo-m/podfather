@@ -40,3 +40,19 @@ The app connects to the Podman REST API over a Unix socket using Go stdlib `net/
 ## Testing
 
 Test fixtures live in `testdata/` (raw Podman API JSON responses). Tests cover data transformation functions (`buildAppCategories`, `appState`, `formatPorts`, etc.) using real API data.
+
+## Dependency pinning
+
+All external dependencies are pinned to exact versions/digests for reproducibility and supply-chain security:
+
+- **GitHub Actions** in `.github/workflows/*.yml` are pinned to full commit SHAs with a `# vX` tag comment. Renovate updates these automatically.
+- **Docker images** in `Dockerfile` and `support/docker-compose.demo.yml` are pinned to `tag@sha256:digest`. The project's own image (`ghcr.io/jo-m/podfather:latest`) in `support/docker-compose.yml` is intentionally left unpinned.
+- **GoReleaser** version in `release.yml` is pinned to an exact version (not `~> v2`).
+- **govulncheck** runs in CI (`ci.yml`) to detect Go vulnerabilities. It is installed as a CI tool, not added to `go.mod`.
+- **Renovate** (`renovate.json`) is configured to create weekly update PRs for all pinned dependencies. Requires the [Mend Renovate GitHub App](https://github.com/apps/renovate) to be installed on the repo.
+
+When adding new GitHub Actions, Docker images, or tool versions, always pin them to an exact SHA/digest. Renovate will handle keeping them up to date.
+
+
+
+You run on nixos use nix-shell -p to load programs if you need them.
