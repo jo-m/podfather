@@ -45,6 +45,7 @@ func (s *Server) newMux(podmanBin string) *http.ServeMux {
 	mux.HandleFunc("GET /container/{id}", s.handleContainer)
 	mux.HandleFunc("GET /images", s.handleImages)
 	mux.HandleFunc("GET /image/{id}", s.handleImage)
+	mux.HandleFunc("GET /logo.svg", handleLogo)
 	mux.HandleFunc("POST /auto-update", s.handleAutoUpdate(podmanBin))
 	return mux
 }
@@ -102,7 +103,7 @@ func logRequests(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("Referrer-Policy", "no-referrer")
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'self'")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'")
 
 		start := time.Now()
 		sw := &statusWriter{ResponseWriter: w, status: http.StatusOK}

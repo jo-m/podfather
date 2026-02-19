@@ -543,6 +543,13 @@ func (s *Server) handleImage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleLogo(w http.ResponseWriter, r *http.Request) {
+	data, _ := templateFS.ReadFile("templates/logo.svg")
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.Write(data)
+}
+
 func (s *Server) handleAutoUpdate(podmanBin string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !s.enableAutoUpdate {

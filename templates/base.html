@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>podfather - {{.Title}}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫛</text></svg>">
+    <link rel="icon" href="{{.BasePath}}/logo.svg" type="image/svg+xml">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #1a1a2e; background: #f0f0f5; -webkit-text-size-adjust: 100%; }
-        nav { background: #1a1a2e; color: #ccc; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        nav { background: #1a1a2e; color: #ccc; padding: 0.25rem 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         nav a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; padding: 0.25rem 0.25rem; }
         nav a:hover { color: #fff; }
         .brand { font-weight: 700; font-size: 1.1rem; color: #e2e8f0; letter-spacing: -0.02em; }
@@ -105,7 +105,7 @@
 </head>
 <body>
     <nav>
-        <a href="{{.BasePath}}/" class="brand" style="text-decoration:none;color:#e2e8f0;">🫛 podfather</a>
+        <a href="{{.BasePath}}/" class="brand" style="text-decoration:none;color:#e2e8f0;display:flex;align-items:center;gap:0.5rem;"><img src="{{.BasePath}}/logo.svg" alt="" width="36" height="36" style="display:block;"> podfather</a>
         <a href="{{.BasePath}}/apps">Apps</a>
         <a href="{{.BasePath}}/containers">Containers</a>
         <a href="{{.BasePath}}/images">Images</a>

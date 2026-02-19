@@ -1,6 +1,6 @@
 [Unit]
 After=podman.socket
-Description=A simple web dashboard for Podman 🫛
+Description=A simple web dashboard for Podman
 Requires=podman.socket
 
 [Service]
