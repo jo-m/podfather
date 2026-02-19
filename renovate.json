@@ -5,5 +5,6 @@
   "pinDigests": true,
   "vulnerabilityAlerts": {
     "enabled": true
-  }
+  },
+  "ignorePaths": ["support/docker-compose.yml", "support/docker-compose.demo.yml"]
 }
