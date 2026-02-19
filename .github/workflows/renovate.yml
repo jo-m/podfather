@@ -5,6 +5,11 @@ on:
     - cron: "0 4 * * 6" # Saturday 4am UTC
   workflow_dispatch:
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   renovate:
     runs-on: ubuntu-latest
@@ -14,3 +19,5 @@ jobs:
       - uses: renovatebot/github-action@d65ef9e20512193cc070238b49c3873a361cd50c # v46.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
