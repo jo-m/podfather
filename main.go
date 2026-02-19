@@ -30,6 +30,7 @@ func reqID(ctx context.Context) string {
 // Server holds all per-instance state for the podfather web server.
 type Server struct {
 	basePath         string
+	hostname         string
 	enableAutoUpdate bool
 	externalApps     []App
 	podmanClient     *http.Client
@@ -58,8 +59,11 @@ func main() {
 		addr = a
 	}
 
+	hostname, _ := os.Hostname()
+
 	s := &Server{
 		basePath:         strings.TrimRight(os.Getenv("BASE_PATH"), "/"),
+		hostname:         hostname,
 		enableAutoUpdate: os.Getenv("ENABLE_AUTOUPDATE_BUTTON") == "true",
 		externalApps:     parseExternalApps(),
 		podmanClient:     newPodmanClient(sock),

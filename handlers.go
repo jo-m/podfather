@@ -244,6 +244,7 @@ func (s *Server) render(w http.ResponseWriter, r *http.Request, page string, dat
 			m["CSRFToken"] = token
 		}
 		m["BasePath"] = s.basePath
+		m["Hostname"] = s.hostname
 		m["EnableAutoUpdate"] = s.enableAutoUpdate
 	}
 	var buf bytes.Buffer

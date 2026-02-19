@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>podfather - {{.Title}}</title>
+    <title>{{.Hostname}} - {{.Title}}</title>
     <link rel="icon" href="{{.BasePath}}/logo.svg" type="image/svg+xml">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -105,7 +105,7 @@
 </head>
 <body>
     <nav>
-        <a href="{{.BasePath}}/" class="brand" style="text-decoration:none;color:#e2e8f0;display:flex;align-items:center;gap:0.5rem;"><img src="{{.BasePath}}/logo.svg" alt="" width="36" height="36" style="display:block;"> podfather</a>
+        <a href="{{.BasePath}}/" class="brand" style="text-decoration:none;color:#e2e8f0;display:flex;align-items:center;gap:0.5rem;"><img src="{{.BasePath}}/logo.svg" alt="" width="36" height="36" style="display:block;"> podfather - {{.Hostname}}</a>
         <a href="{{.BasePath}}/apps">Apps</a>
         <a href="{{.BasePath}}/containers">Containers</a>
         <a href="{{.BasePath}}/images">Images</a>
