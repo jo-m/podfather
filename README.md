@@ -4,6 +4,8 @@ A simple web dashboard for Podman.
 Single binary, no JavaScript, no external dependencies.
 Ideal as landing page for your self-hosting setup.
 
+![screenshot](support/screenshot.png)
+
 ## Features
 
 - Apps dashboard - start page showing containers as application cards, grouped by category. Can be configured via container labels.
