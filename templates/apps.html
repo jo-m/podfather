@@ -6,13 +6,11 @@
 <div class="app-grid">
     {{range .Apps}}
     <div class="app-card">
-        {{if .URL}}<a class="app-card-body" href="{{.URL}}" target="_blank" rel="noopener">{{else}}<div class="app-card-body">{{end}}
-            <div class="app-card-header">
-                {{if .Icon}}<span class="app-icon">{{.Icon}}</span>{{end}}
-                <span class="app-name">{{.Name}}</span>
-            </div>
-            {{if .Description}}<div class="app-desc">{{.Description}}</div>{{end}}
-        {{if .URL}}</a>{{else}}</div>{{end}}
+        <div class="app-card-header">
+            {{if .Icon}}<span class="app-icon">{{.Icon}}</span>{{end}}
+            {{if .URL}}<a class="app-link" href="{{.URL}}" target="_blank" rel="noopener">{{.Name}}</a>{{else}}<span class="app-name">{{.Name}}</span>{{end}}
+        </div>
+        {{if .Description}}<div class="app-desc">{{.Description}}</div>{{end}}
         <div class="app-states">
             {{range .Containers}}
             <a class="badge badge-{{.State}}" href="{{$.BasePath}}/container/{{.ID}}" title="{{firstName .Names}}">{{.State}}</a>
