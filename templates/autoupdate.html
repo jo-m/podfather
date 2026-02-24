@@ -2,13 +2,43 @@
 <a href="{{.BasePath}}/" class="back">&larr; Back</a>
 <h1>Auto Update</h1>
 <div class="card">
-    {{if .Error}}
-    <p style="color: #dc2626; font-weight: 600;">Error: {{.Error}}</p>
-    {{end}}
-    {{if .Output}}
-    <pre>{{.Output}}</pre>
-    {{else}}
-    <p class="empty">No output.</p>
-    {{end}}
+    <p id="error" style="color: #dc2626; font-weight: 600; display: none;"></p>
+    <pre id="output" style="display: none; max-height: 70vh; overflow-y: auto;"></pre>
+    <p id="status" class="empty">Starting update&hellip;</p>
 </div>
+<script>
+(function() {
+    var output = document.getElementById('output');
+    var status = document.getElementById('status');
+    var errorEl = document.getElementById('error');
+    var es = new EventSource('{{.BasePath}}/auto-update/events');
+    es.onmessage = function(e) {
+        output.style.display = '';
+        output.textContent += e.data + '\n';
+        output.scrollTop = output.scrollHeight;
+        status.textContent = 'Updating\u2026';
+    };
+    es.addEventListener('err', function(e) {
+        errorEl.textContent = 'Error: ' + e.data;
+        errorEl.style.display = '';
+    });
+    es.addEventListener('done', function(e) {
+        if (e.data === 'no-update') {
+            status.textContent = 'No update in progress.';
+        } else if (output.textContent) {
+            status.textContent = 'Update complete.';
+        } else {
+            status.textContent = 'Update complete. No output.';
+        }
+        es.close();
+    });
+    es.onerror = function(ev) {
+        console.log(ev)
+        if (!output.textContent) {
+            status.textContent = 'Connection lost.';
+        }
+        es.close();
+    };
+})();
+</script>
 {{end}}

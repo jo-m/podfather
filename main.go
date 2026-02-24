@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -29,13 +30,14 @@ func reqID(ctx context.Context) string {
 
 // Server holds all per-instance state for the podfather web server.
 type Server struct {
-	basePath         string
-	hostname         string
-	enableAutoUpdate bool
-	externalApps     []App
-	podmanClient     *http.Client
-	podmanBaseURL    string
-	autoUpdateMu     sync.Mutex
+	basePath          string
+	hostname          string
+	enableAutoUpdate  bool
+	externalApps      []App
+	podmanClient      *http.Client
+	podmanBaseURL     string
+	autoUpdateMu      sync.Mutex
+	currentAutoUpdate atomic.Pointer[autoUpdateResult]
 }
 
 func (s *Server) newMux(podmanBin string) *http.ServeMux {
@@ -47,7 +49,9 @@ func (s *Server) newMux(podmanBin string) *http.ServeMux {
 	mux.HandleFunc("GET /images", s.handleImages)
 	mux.HandleFunc("GET /image/{id}", s.handleImage)
 	mux.HandleFunc("GET /logo.svg", handleLogo)
-	mux.HandleFunc("POST /auto-update", s.handleAutoUpdate(podmanBin))
+	mux.HandleFunc("POST /auto-update", s.handleAutoUpdatePost(podmanBin))
+	mux.HandleFunc("GET /auto-update", s.handleAutoUpdatePage)
+	mux.HandleFunc("GET /auto-update/events", s.handleAutoUpdateEvents)
 	return mux
 }
 
@@ -96,6 +100,12 @@ func (w *statusWriter) WriteHeader(code int) {
 	w.ResponseWriter.WriteHeader(code)
 }
 
+func (w *statusWriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 func logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var buf [4]byte
@@ -107,7 +117,7 @@ func logRequests(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("Referrer-Policy", "no-referrer")
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; form-action 'self'")
 
 		start := time.Now()
 		sw := &statusWriter{ResponseWriter: w, status: http.StatusOK}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/rand"
@@ -17,6 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -551,7 +553,14 @@ func handleLogo(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func (s *Server) handleAutoUpdate(podmanBin string) http.HandlerFunc {
+type autoUpdateResult struct {
+	mu   sync.Mutex
+	buf  []byte
+	done bool
+	err  string
+}
+
+func (s *Server) handleAutoUpdatePost(podmanBin string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !s.enableAutoUpdate {
 			http.Error(w, "Not Found", http.StatusNotFound)
@@ -559,25 +568,136 @@ func (s *Server) handleAutoUpdate(podmanBin string) http.HandlerFunc {
 		}
 
 		if !s.autoUpdateMu.TryLock() {
-			http.Error(w, "Update already in progress", http.StatusConflict)
+			http.Redirect(w, r, s.basePath+"/auto-update", http.StatusSeeOther)
 			return
 		}
-		defer s.autoUpdateMu.Unlock()
 
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
-		defer cancel()
+		result := &autoUpdateResult{}
+		s.currentAutoUpdate.Store(result)
 
-		cmd := exec.CommandContext(ctx, podmanBin, "auto-update")
-		out, err := cmd.CombinedOutput()
+		go func() {
+			defer s.autoUpdateMu.Unlock()
 
-		var errMsg string
-		if err != nil {
-			errMsg = err.Error()
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+			defer cancel()
+
+			cmd := exec.CommandContext(ctx, podmanBin, "auto-update")
+			stdoutR, stdoutW, err := os.Pipe()
+			if err != nil {
+				result.mu.Lock()
+				result.err = err.Error()
+				result.done = true
+				result.mu.Unlock()
+				return
+			}
+			cmd.Stdout = stdoutW
+			cmd.Stderr = stdoutW
+
+			if err := cmd.Start(); err != nil {
+				stdoutW.Close()
+				stdoutR.Close()
+				result.mu.Lock()
+				result.err = err.Error()
+				result.done = true
+				result.mu.Unlock()
+				return
+			}
+			stdoutW.Close()
+
+			scanner := bufio.NewScanner(stdoutR)
+			for scanner.Scan() {
+				result.mu.Lock()
+				result.buf = append(result.buf, scanner.Bytes()...)
+				result.buf = append(result.buf, '\n')
+				result.mu.Unlock()
+			}
+			stdoutR.Close()
+
+			if err := cmd.Wait(); err != nil {
+				result.mu.Lock()
+				result.err = err.Error()
+				result.mu.Unlock()
+			}
+			result.mu.Lock()
+			result.done = true
+			result.mu.Unlock()
+		}()
+
+		http.Redirect(w, r, s.basePath+"/auto-update", http.StatusSeeOther)
+	}
+}
+
+func (s *Server) handleAutoUpdatePage(w http.ResponseWriter, r *http.Request) {
+	if !s.enableAutoUpdate {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+	s.render(w, r, "autoupdate.html", map[string]any{
+		"Title": "Auto Update",
+	})
+}
+
+func (s *Server) handleAutoUpdateEvents(w http.ResponseWriter, r *http.Request) {
+	if !s.enableAutoUpdate {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	result := s.currentAutoUpdate.Load()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	if result == nil {
+		fmt.Fprintf(w, "event: done\ndata: no-update\n\n")
+		flusher.Flush()
+		return
+	}
+
+	offset := 0
+	for {
+		result.mu.Lock()
+		data := make([]byte, len(result.buf)-offset)
+		copy(data, result.buf[offset:])
+		isDone := result.done
+		errMsg := result.err
+		result.mu.Unlock()
+
+		if len(data) > 0 {
+			text := string(data)
+			for len(text) > 0 {
+				idx := strings.IndexByte(text, '\n')
+				if idx < 0 {
+					fmt.Fprintf(w, "data: %s\n\n", text)
+					break
+				}
+				fmt.Fprintf(w, "data: %s\n\n", text[:idx])
+				text = text[idx+1:]
+			}
+			offset += len(data)
+			flusher.Flush()
 		}
-		s.render(w, r, "autoupdate.html", map[string]any{
-			"Title":  "Auto Update",
-			"Output": string(out),
-			"Error":  errMsg,
-		})
+
+		if isDone {
+			if errMsg != "" {
+				fmt.Fprintf(w, "event: err\ndata: %s\n\n", errMsg)
+			}
+			fmt.Fprintf(w, "event: done\ndata: \n\n")
+			flusher.Flush()
+			return
+		}
+
+		select {
+		case <-r.Context().Done():
+			return
+		case <-time.After(200 * time.Millisecond):
+		}
 	}
 }
