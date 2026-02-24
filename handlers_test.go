@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func loadTestContainers(t *testing.T) []Container {
@@ -503,6 +505,162 @@ func TestEndToEndAutoUpdate(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	if len(body) == 0 {
 		t.Error("empty response body")
+	}
+}
+
+func TestAutoUpdatePostRedirects(t *testing.T) {
+	t.Parallel()
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	s := newTestServer(t, mock)
+	s.enableAutoUpdate = true
+
+	app := httptest.NewServer(s.csrfProtect(s.newMux("true")))
+	defer app.Close()
+
+	noRedirect := &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	// Get CSRF cookie.
+	resp, err := http.Get(app.URL + "/apps")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	var csrfCookie *http.Cookie
+	for _, c := range resp.Cookies() {
+		if c.Name == csrfCookieName {
+			csrfCookie = c
+			break
+		}
+	}
+	if csrfCookie == nil {
+		t.Fatal("no CSRF cookie")
+	}
+
+	form := url.Values{csrfFormField: {csrfCookie.Value}}
+	req, _ := http.NewRequest("POST", app.URL+"/auto-update", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(csrfCookie)
+	resp, err = noRedirect.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusSeeOther {
+		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusSeeOther)
+	}
+	loc := resp.Header.Get("Location")
+	if !strings.HasSuffix(loc, "/auto-update") {
+		t.Errorf("Location = %q, want suffix /auto-update", loc)
+	}
+}
+
+func TestAutoUpdateSSENoUpdate(t *testing.T) {
+	t.Parallel()
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	s := newTestServer(t, mock)
+	s.enableAutoUpdate = true
+
+	app := httptest.NewServer(s.csrfProtect(s.newMux("true")))
+	defer app.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	req, _ := http.NewRequestWithContext(ctx, "GET", app.URL+"/auto-update/events", nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	bodyStr := string(body)
+
+	if !strings.Contains(bodyStr, "event: done") {
+		t.Errorf("expected done event, got: %s", bodyStr)
+	}
+	if !strings.Contains(bodyStr, "data: no-update") {
+		t.Errorf("expected no-update data, got: %s", bodyStr)
+	}
+}
+
+func TestAutoUpdateSSEStream(t *testing.T) {
+	t.Parallel()
+	mock := newMockPodmanAPI(t)
+	defer mock.Close()
+
+	s := newTestServer(t, mock)
+	s.enableAutoUpdate = true
+
+	// Use "echo" so the command produces output: "echo auto-update" prints "auto-update".
+	app := httptest.NewServer(s.csrfProtect(s.newMux("echo")))
+	defer app.Close()
+
+	noRedirect := &http.Client{
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	// Get CSRF cookie.
+	resp, err := http.Get(app.URL + "/apps")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	var csrfCookie *http.Cookie
+	for _, c := range resp.Cookies() {
+		if c.Name == csrfCookieName {
+			csrfCookie = c
+			break
+		}
+	}
+	if csrfCookie == nil {
+		t.Fatal("no CSRF cookie")
+	}
+
+	// Trigger update via POST.
+	form := url.Values{csrfFormField: {csrfCookie.Value}}
+	req, _ := http.NewRequest("POST", app.URL+"/auto-update", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(csrfCookie)
+	resp, err = noRedirect.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+
+	// Connect to SSE endpoint with timeout.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	req, _ = http.NewRequestWithContext(ctx, "GET", app.URL+"/auto-update/events", nil)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if ct := resp.Header.Get("Content-Type"); ct != "text/event-stream" {
+		t.Errorf("Content-Type = %q, want text/event-stream", ct)
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	bodyStr := string(body)
+
+	// "echo auto-update" outputs "auto-update".
+	if !strings.Contains(bodyStr, "data: auto-update") {
+		t.Errorf("expected output containing 'data: auto-update', got: %s", bodyStr)
+	}
+	if !strings.Contains(bodyStr, "event: done") {
+		t.Errorf("expected done event, got: %s", bodyStr)
 	}
 }
 
