@@ -1,7 +1,8 @@
 # podfather
 
 A simple web dashboard for Podman.
-Single binary, no JavaScript, no external dependencies.
+Single binary, almost no JavaScript[^1], no external dependencies.
+
 Ideal as landing page for your self-hosting setup.
 
 ![screenshot](support/screenshot.png)
@@ -141,3 +142,5 @@ CI also runs [`govulncheck`](https://pkg.go.dev/golang.org/x/vuln/cmd/govulnchec
 2. Create a new tag (e.g. `v1.2.0`).
 3. Fill in the release title and description, then click **Publish release**.
 4. The [Release workflow](.github/workflows/release.yml) will automatically build binaries, Docker images, and attach them to the release.
+
+[^1]: Small inline script in `templates/autoupdate.html` for live update streaming.
